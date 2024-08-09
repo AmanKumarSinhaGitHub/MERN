@@ -2,6 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 
+
 /* First Way of writing the code
 router.get('/', (req, res) => {
     res.send('Hello World using Router');
@@ -9,10 +10,20 @@ router.get('/', (req, res) => {
 */
 
 // You can also write the above code as below:
+// router.route('/')
+//     .get((req, res) => {
+//         res.send('Hello World using Router');
+//     })
+
+
+const { home, register } = require('../controllers/auth-controller');
+
 router.route('/')
-    .get((req, res) => {
-        res.send('Hello World using Router');
-    })
+    .get(home);
+
+
+router.route('/register')
+    .get(register);
 
 
 module.exports = router;
