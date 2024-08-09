@@ -23,7 +23,7 @@ router.route('/')
 
 
 router.route('/register')
-    .get(register);
+    .post(register);
 
 
 module.exports = router;
