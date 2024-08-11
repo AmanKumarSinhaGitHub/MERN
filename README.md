@@ -279,9 +279,8 @@ To test the API with Postman:
 
 - For visual reference, check the screenshots provided:
 
- - ![Header-Postman](./screenshots/auth-register-header.png)
- - ![Body-Postman](./screenshots/auth-register-body.png)
-
+- ![Header-Postman](./screenshots/auth-register-header.png)
+- ![Body-Postman](./screenshots/auth-register-body.png)
 
 ## Day 4: Connecting Backend with MongoDB
 
@@ -300,9 +299,11 @@ npm install mongodb mongoose dotenv
 To use MongoDB in a cloud environment, follow these steps to set up MongoDB Atlas:
 
 1. **Create a MongoDB Atlas Account:**
+
    - Visit [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register) and log in or sign up for an account.
 
 2. **Create a New Project:**
+
    - After logging in, create a new project in MongoDB Atlas.
 
    - ![create project](./screenshots/create_project.png)
@@ -310,39 +311,41 @@ To use MongoDB in a cloud environment, follow these steps to set up MongoDB Atla
    - ![create project](./screenshots/create_project3.png)
 
 3. **Configure Network Access:**
+
    - In the security section, open the **Network Access** tab.
    - Add your current IP address to allow access from your machine.
 
    - ![network access](./screenshots/network_access.png)
 
 4. **Create a Database User:**
+
    - In the **Database Access** tab, add a new user with `Read and Write` permissions.
 
    - ![databse project](./screenshots/database_access.png)
 
 5. **Create a Cluster:**
+
    - Go to the **Deployment** section and create a new cluster. Choose your preferred configuration.
 
    - ![create cluster](./screenshots/creating_cluster.png)
 
-
 6. **Connect to Your Cluster:**
+
    - After the cluster is created, click on the **Connect** button.
 
    - ![connect](./screenshots/connecting.png)
 
-   - Choose a connection method 
-   
-    - ![connect method](./screenshots/connect_using.png)
+   - Choose a connection method
 
-    - Get the connection string, which will look something like this:
+   - ![connect method](./screenshots/connect_using.png)
 
-     ```
-     mongodb+srv://<username>:<password>@<cluster_name>.mongodb.net
-     ```
-     - ![connection string](./screenshots/connection_string.png)
-    
-    
+   - Get the connection string, which will look something like this:
+
+   ```
+   mongodb+srv://<username>:<password>@<cluster_name>.mongodb.net
+   ```
+
+   - ![connection string](./screenshots/connection_string.png)
 
 ### Step 3: Set Up Environment Variables
 
@@ -360,24 +363,26 @@ Replace `<username>`, `<password>`, and `<cluster_name>` with the actual values 
 To manage the MongoDB connection, create a new folder named `utils` in the `backend` directory and inside it, create a file named `db.js` with the following code:
 
 ```js
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const URI = process.env.MONGO_URI;
 
 const connectDB = async () => {
-    if (!URI) {
-        console.error('MongoDB URI is not defined');
-        process.exit(1); // Exit if URI is not set
-    }
-    
-    try {
-        const conn = await mongoose.connect(URI);
-        console.log('MongoDB Connected');
-    } catch (error) {
-        console.error(`Error: ${error.message}`);
-        process.exit(1);
-    }
-}
+  if (!URI) {
+    console.error("MongoDB URI is not defined");
+    process.exit(1); // Exit if URI is not set
+  }
+
+  try {
+    const conn = await mongoose.connect(URI, {
+      dbName: "mern", // Replace with your actual database name
+    });
+    console.log("MongoDB Database Connected Successfully");
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
+    process.exit(1);
+  }
+};
 
 module.exports = connectDB;
 ```
@@ -418,4 +423,64 @@ connectDB()
   });
 ```
 
-This setup ensures that your server only starts after a successful connection to MongoDB.
+
+## Day 5 - User Model and Schema
+
+### Understanding Schema and Model:
+
+- **Schema**: 
+  - Defines the structure of the documents within a MongoDB collection.
+  - Specifies the fields, their types, and additional constraints or validation rules.
+  
+- **Model**:
+  - A higher-level abstraction that interacts with the database based on the defined schema.
+  - Represents a collection and provides an interface for querying, creating, updating, and deleting documents in that collection.
+  - Models are created from schemas and enable you to work with MongoDB data in a more structured manner in your application.
+
+### Steps:
+
+1. **Create the `model` Folder**:
+   - In the `backend` directory, create a new folder named `model`.
+
+2. **Create the `user-model.js` File**:
+   - Inside the `model` folder, create a file named `user-model.js`.
+   - Define the `userSchema` and `User` model as follows:
+
+```js
+const mongoose = require("mongoose");
+
+const userSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  phone: {
+    type: Number,
+    required: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const User = mongoose.model("User", userSchema);
+module.exports = User;
+```
+
+### Explanation:
+
+- **Fields**:
+  - `username`, `email`, `phone`, and `password` are required fields.
+  - `email` is also unique, meaning no two users can have the same email address.
+  - `isAdmin` is a boolean field with a default value of `false`, indicating whether the user has admin privileges.
+
