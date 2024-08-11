@@ -277,9 +277,145 @@ To test the API with Postman:
 
 5. Click `Send` to make the request. You should see the response containing the JSON data you sent.
 
-For visual reference, check the screenshots provided:
+- For visual reference, check the screenshots provided:
 
-- ![Header-Postman](./screenshots/auth-register-header.png)
-- ![Body-Postman](./screenshots/auth-register-body.png)
+ - ![Header-Postman](./screenshots/auth-register-header.png)
+ - ![Body-Postman](./screenshots/auth-register-body.png)
 
 
+## Day 4: Connecting Backend with MongoDB
+
+In this section, we'll connect our backend to MongoDB, a NoSQL database that stores data in flexible, JSON-like documents. We will use **Mongoose**, an ODM (Object Data Modeling) library, to interact with MongoDB in a more structured and efficient way.
+
+### Step 1: Install Required Packages
+
+First, install the necessary packages for MongoDB connection and environment variable management:
+
+```bash
+npm install mongodb mongoose dotenv
+```
+
+### Step 2: Set Up MongoDB Atlas
+
+To use MongoDB in a cloud environment, follow these steps to set up MongoDB Atlas:
+
+1. **Create a MongoDB Atlas Account:**
+   - Visit [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register) and log in or sign up for an account.
+
+2. **Create a New Project:**
+   - After logging in, create a new project in MongoDB Atlas.
+
+   - ![create project](./screenshots/create_project.png)
+   - ![create project](./screenshots/create_project2.png)
+   - ![create project](./screenshots/create_project3.png)
+
+3. **Configure Network Access:**
+   - In the security section, open the **Network Access** tab.
+   - Add your current IP address to allow access from your machine.
+
+   - ![network access](./screenshots/network_access.png)
+
+4. **Create a Database User:**
+   - In the **Database Access** tab, add a new user with `Read and Write` permissions.
+
+   - ![databse project](./screenshots/database_access.png)
+
+5. **Create a Cluster:**
+   - Go to the **Deployment** section and create a new cluster. Choose your preferred configuration.
+
+   - ![create cluster](./screenshots/creating_cluster.png)
+
+
+6. **Connect to Your Cluster:**
+   - After the cluster is created, click on the **Connect** button.
+
+   - ![connect](./screenshots/connecting.png)
+
+   - Choose a connection method 
+   
+    - ![connect method](./screenshots/connect_using.png)
+
+    - Get the connection string, which will look something like this:
+
+     ```
+     mongodb+srv://<username>:<password>@<cluster_name>.mongodb.net
+     ```
+     - ![connection string](./screenshots/connection_string.png)
+    
+    
+
+### Step 3: Set Up Environment Variables
+
+Create a `.env` file in the root directory of the `backend` folder and add the following content:
+
+```bash
+PORT=3000
+MONGO_URI=mongodb+srv://<username>:<password>@<cluster_name>.mongodb.net
+```
+
+Replace `<username>`, `<password>`, and `<cluster_name>` with the actual values from your MongoDB Atlas connection string.
+
+### Step 4: Create a Database Utility File
+
+To manage the MongoDB connection, create a new folder named `utils` in the `backend` directory and inside it, create a file named `db.js` with the following code:
+
+```js
+const mongoose = require('mongoose');
+
+const URI = process.env.MONGO_URI;
+
+const connectDB = async () => {
+    if (!URI) {
+        console.error('MongoDB URI is not defined');
+        process.exit(1); // Exit if URI is not set
+    }
+    
+    try {
+        const conn = await mongoose.connect(URI);
+        console.log('MongoDB Connected');
+    } catch (error) {
+        console.error(`Error: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+module.exports = connectDB;
+```
+
+This utility file will handle the connection to the MongoDB database.
+
+### Step 5: Integrate MongoDB Connection into the Server
+
+Now, modify your `index.js` file to use the `connectDB` function for connecting to MongoDB before starting the server:
+
+```js
+require("dotenv").config();
+const express = require("express");
+const app = express();
+const router = require("./router/auth-router");
+const connectDB = require("./utils/db");
+
+// Middleware
+app.use(express.json());
+app.use("/api/auth", router);
+
+app.get("/", (req, res) => {
+  res.send("Hello World");
+});
+
+// Connect to the database and start the server
+connectDB()
+  .then(() => {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+    console.log("Database connected");
+  })
+  .catch((err) => {
+    console.error("Database connection failed", err);
+    process.exit(1);
+  });
+```
+
+This setup ensures that your server only starts after a successful connection to MongoDB.
