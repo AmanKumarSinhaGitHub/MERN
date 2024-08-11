@@ -484,3 +484,112 @@ module.exports = User;
   - `email` is also unique, meaning no two users can have the same email address.
   - `isAdmin` is a boolean field with a default value of `false`, indicating whether the user has admin privileges.
 
+
+## Day 6 - Storing Registered User Data in MongoDB Using Postman
+
+In this step, we will update our `auth-controller.js` to store registered user data in the MongoDB database. We'll validate the input data, check if the user already exists, and then create a new user record if everything is valid.
+
+### Step 1: Update `auth-controller.js`
+
+Make the following changes to your `auth-controller.js`:
+
+```js
+const User = require('../models/user-model');
+
+const home = async (req, res) => {
+    try {
+        res.send("Welcome to the home page using controller");
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+const register = async (req, res) => {
+    try {
+        console.log(req.body);
+
+        const { username, email, phone, password } = req.body;
+
+        // Check if any field is empty
+        if (!username || !email || !phone || !password) {
+            return res.status(400).json({ message: "Please fill all the fields" });
+        }
+
+        // Check if the user already exists (email)
+        const userExists = await User.findOne({ email });
+        if (userExists) {
+            return res.status(400).json({ message: "User already exists" });
+        }
+
+        // Create a new user
+        const user = await User.create({
+            username,
+            email,
+            phone,
+            password
+        });
+
+        res.status(201).json({ message: "User registered successfully", user });
+        console.log(user);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error. Please try again later." });
+    }
+}
+
+module.exports = { home, register };
+```
+
+### Explanation:
+
+1. **Field Validation**: The code first checks if all required fields (`username`, `email`, `phone`, and `password`) are provided. If any field is missing, it returns a `400 Bad Request` response with a message indicating that all fields must be filled.
+
+2. **User Existence Check**: It then checks if a user with the same email already exists in the database. If the user is found, it returns a `400 Bad Request` response with a message indicating that the user already exists.
+
+3. **User Creation**: If the user does not exist, the code creates a new user document in the database with the provided data and returns a `201 Created` response, indicating that the user was successfully registered.
+
+4. **Error Handling**: Any errors during the process are caught, logged, and a `500 Internal Server Error` response is sent to the client.
+
+### Step 2: Test the Registration Endpoint Using Postman
+
+Now, you can test the registration functionality using Postman:
+
+1. **Open Postman**:
+   - Set the request type to `POST`.
+   - Enter the URL: `http://localhost:3000/api/auth/register`.
+
+2. **Headers**:
+   - Ensure the `Content-Type` header is set to `application/json`.
+
+3. **Body**:
+   - Select `raw` and choose `JSON` from the dropdown.
+   - Enter the following JSON data in the body:
+     ```json
+     {
+         "username": "aman",
+         "email": "amankrsinha07@gmail.com",
+         "phone": "9876543210",
+         "password": "12345"
+     }
+     ```
+
+4. **Send the Request**:
+   - Click `Send` to register the new user.
+   - If successful, you should see a response with the message "User registered successfully" and the user data.
+
+#### Screenshot References:
+
+- **Register Using Postman**: 
+  - ![Register using Postman](./screenshots/user_register_using_postman.png)
+
+- **User Data in MongoDB Atlas**: 
+  - ![User data in Atlas](./screenshots/user_in_atlas.png)
+
+- **User Data in MongoDB Compass**:
+  - ![User data in Compass](./screenshots/user_in_compass.png)
+
+### Conclusion:
+
+By following these steps, you've successfully implemented a feature to store registered user data in MongoDB. You've also learned how to validate input data, check for existing users, and handle errors, all while testing the functionality using Postman. 
+
+This is a crucial step in building your MERN stack application, as user registration is often the first interaction users have with your backend system.
