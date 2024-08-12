@@ -314,6 +314,7 @@ To use MongoDB in a cloud environment, follow these steps to set up MongoDB Atla
 
    - In the security section, open the **Network Access** tab.
    - Add your current IP address to allow access from your machine.
+   - If you want to access your database from any computer, then add this IP also `0.0.0.0/0`
 
    - ![network access](./screenshots/network_access.png)
 
@@ -423,15 +424,13 @@ connectDB()
   });
 ```
 
-
 ## Day 5 - User Model and Schema
 
 ### Understanding Schema and Model:
 
-- **Schema**: 
+- **Schema**:
   - Defines the structure of the documents within a MongoDB collection.
   - Specifies the fields, their types, and additional constraints or validation rules.
-  
 - **Model**:
   - A higher-level abstraction that interacts with the database based on the defined schema.
   - Represents a collection and provides an interface for querying, creating, updating, and deleting documents in that collection.
@@ -440,6 +439,7 @@ connectDB()
 ### Steps:
 
 1. **Create the `model` Folder**:
+
    - In the `backend` directory, create a new folder named `model`.
 
 2. **Create the `user-model.js` File**:
@@ -484,7 +484,6 @@ module.exports = User;
   - `email` is also unique, meaning no two users can have the same email address.
   - `isAdmin` is a boolean field with a default value of `false`, indicating whether the user has admin privileges.
 
-
 ## Day 6 - Storing Registered User Data in MongoDB Using Postman
 
 In this step, we will update our `auth-controller.js` to store registered user data in the MongoDB database. We'll validate the input data, check if the user already exists, and then create a new user record if everything is valid.
@@ -494,48 +493,48 @@ In this step, we will update our `auth-controller.js` to store registered user d
 Make the following changes to your `auth-controller.js`:
 
 ```js
-const User = require('../models/user-model');
+const User = require("../models/user-model");
 
 const home = async (req, res) => {
-    try {
-        res.send("Welcome to the home page using controller");
-    } catch (error) {
-        console.error(error);
-    }
-}
+  try {
+    res.send("Welcome to the home page using controller");
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 const register = async (req, res) => {
-    try {
-        console.log(req.body);
+  try {
+    console.log(req.body);
 
-        const { username, email, phone, password } = req.body;
+    const { username, email, phone, password } = req.body;
 
-        // Check if any field is empty
-        if (!username || !email || !phone || !password) {
-            return res.status(400).json({ message: "Please fill all the fields" });
-        }
-
-        // Check if the user already exists (email)
-        const userExists = await User.findOne({ email });
-        if (userExists) {
-            return res.status(400).json({ message: "User already exists" });
-        }
-
-        // Create a new user
-        const user = await User.create({
-            username,
-            email,
-            phone,
-            password
-        });
-
-        res.status(201).json({ message: "User registered successfully", user });
-        console.log(user);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Server error. Please try again later." });
+    // Check if any field is empty
+    if (!username || !email || !phone || !password) {
+      return res.status(400).json({ message: "Please fill all the fields" });
     }
-}
+
+    // Check if the user already exists (email)
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    // Create a new user
+    const user = await User.create({
+      username,
+      email,
+      phone,
+      password,
+    });
+
+    res.status(201).json({ message: "User registered successfully", user });
+    console.log(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error. Please try again later." });
+  }
+};
 
 module.exports = { home, register };
 ```
@@ -555,21 +554,24 @@ module.exports = { home, register };
 Now, you can test the registration functionality using Postman:
 
 1. **Open Postman**:
+
    - Set the request type to `POST`.
    - Enter the URL: `http://localhost:3000/api/auth/register`.
 
 2. **Headers**:
+
    - Ensure the `Content-Type` header is set to `application/json`.
 
 3. **Body**:
+
    - Select `raw` and choose `JSON` from the dropdown.
    - Enter the following JSON data in the body:
      ```json
      {
-         "username": "aman",
-         "email": "amankrsinha07@gmail.com",
-         "phone": "9876543210",
-         "password": "12345"
+       "username": "aman",
+       "email": "amankrsinha07@gmail.com",
+       "phone": "9876543210",
+       "password": "12345"
      }
      ```
 
@@ -579,10 +581,12 @@ Now, you can test the registration functionality using Postman:
 
 #### Screenshot References:
 
-- **Register Using Postman**: 
+- **Register Using Postman**:
+
   - ![Register using Postman](./screenshots/user_register_using_postman.png)
 
-- **User Data in MongoDB Atlas**: 
+- **User Data in MongoDB Atlas**:
+
   - ![User data in Atlas](./screenshots/user_in_atlas.png)
 
 - **User Data in MongoDB Compass**:
@@ -590,6 +594,65 @@ Now, you can test the registration functionality using Postman:
 
 ### Conclusion:
 
-By following these steps, you've successfully implemented a feature to store registered user data in MongoDB. You've also learned how to validate input data, check for existing users, and handle errors, all while testing the functionality using Postman. 
+By following these steps, you've successfully implemented a feature to store registered user data in MongoDB. You've also learned how to validate input data, check for existing users, and handle errors, all while testing the functionality using Postman.
 
 This is a crucial step in building your MERN stack application, as user registration is often the first interaction users have with your backend system.
+
+
+## Day 7 - Secure User Password Using Bcrypt.js
+
+To enhance the security of your application, it is crucial to hash passwords before storing them in the database. This ensures that even if your database is compromised, the stored passwords remain secure.
+
+### Step 1: Install Bcrypt.js
+
+First, you'll need to install the `bcryptjs` package, which will help you hash passwords.
+
+```bash
+npm i bcryptjs
+```
+
+### Step 2: Update `auth-controller.js`
+
+Now, modify your `auth-controller.js` to hash the user's password before saving it to the database:
+
+```js
+const bcrypt = require("bcryptjs");
+
+// Hashing the password before creating user
+const saltRounds = 10;
+const hashedPassword = await bcrypt.hash(String(password), saltRounds);
+
+// Create a new user with the hashed password
+const user = await User.create({
+  username,
+  email,
+  phone,
+  password: hashedPassword,
+});
+```
+
+### Explanation:
+
+1. **Bcrypt.js Import**: We first import `bcryptjs` to use its hashing functionality.
+
+2. **Salt Rounds**: The `saltRounds` variable defines the cost factor, which is the number of times the hashing algorithm will be applied. A higher number increases the computation time, making it harder for attackers to crack the password.
+
+3. **Hashing the Password**: 
+   - The `bcrypt.hash()` method takes two arguments: the password to hash and the number of salt rounds.
+   - The `String(password)` ensures that the password is converted to a string before hashing.
+   - The hashed password is then stored in the `hashedPassword` variable.
+
+4. **Creating the User**: 
+   - Instead of storing the plain password, we store the `hashedPassword` in the database when creating a new user.
+
+### Step 3: Testing the Hashed Password
+
+After implementing the changes, you can test the registration functionality again using Postman, as you did in Day 6. This time, when you check the user data in MongoDB Atlas or Compass, you should see the password field containing a hashed value instead of the plain text password.
+
+#### Screenshot Reference:
+
+- **Hashed Password in Database**: 
+  - ![Hashed Password](./screenshots/hashedPassword.png)
+
+
+

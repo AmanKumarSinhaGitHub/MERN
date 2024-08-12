@@ -9,9 +9,10 @@ const connectDB = async () => {
     }
     
     try {
-        const conn = await mongoose.connect(URI, {
-            dbName: 'mern', // Replace with your actual database name
-        });
+        const dbName = "mern";
+        const conn = await mongoose.connect(`${URI}/${dbName}`);
+
+        
         console.log('MongoDB Database Connected Successfully');
     } catch (error) {
         console.error(`Error: ${error.message}`);
