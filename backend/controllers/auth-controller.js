@@ -38,7 +38,13 @@ const register = async (req, res) => {
             password: hashedPassword
         });
 
-        res.status(201).json({ message: "User registered successfully", user });
+        res.status(201).json({
+            message: "User registered successfully",
+            createdUser: user,
+            token: await user.generateToken(),
+            userId: user._id.toString(),
+          });
+
         console.log(user);
     } catch (error) {
         console.error(error);

@@ -598,7 +598,6 @@ By following these steps, you've successfully implemented a feature to store reg
 
 This is a crucial step in building your MERN stack application, as user registration is often the first interaction users have with your backend system.
 
-
 ## Day 7 - Secure User Password Using Bcrypt.js
 
 To enhance the security of your application, it is crucial to hash passwords before storing them in the database. This ensures that even if your database is compromised, the stored passwords remain secure.
@@ -637,12 +636,13 @@ const user = await User.create({
 
 2. **Salt Rounds**: The `saltRounds` variable defines the cost factor, which is the number of times the hashing algorithm will be applied. A higher number increases the computation time, making it harder for attackers to crack the password.
 
-3. **Hashing the Password**: 
+3. **Hashing the Password**:
+
    - The `bcrypt.hash()` method takes two arguments: the password to hash and the number of salt rounds.
    - The `String(password)` ensures that the password is converted to a string before hashing.
    - The hashed password is then stored in the `hashedPassword` variable.
 
-4. **Creating the User**: 
+4. **Creating the User**:
    - Instead of storing the plain password, we store the `hashedPassword` in the database when creating a new user.
 
 ### Step 3: Testing the Hashed Password
@@ -651,8 +651,148 @@ After implementing the changes, you can test the registration functionality agai
 
 #### Screenshot Reference:
 
-- **Hashed Password in Database**: 
+- **Hashed Password in Database**:
   - ![Hashed Password](./screenshots/hashedPassword.png)
 
+### Conclusion:
 
+By hashing passwords before storing them, you've taken an essential step toward securing user data in your application. Bcrypt.js is a widely-used and trusted library for password hashing, making it an excellent choice for this task.
+
+Here's the improved and detailed version for **Day 8**:
+
+---
+
+## Day 8 - Secure User Authentication with JSON Web Token (JWT)
+
+JSON Web Tokens (JWT) are an open standard (RFC 7519) that defines a compact and self-contained way of securely transmitting information between parties as a JSON object. JWTs are widely used for authentication and authorization in web applications.
+
+### Why Use JWT?
+
+1. **Authentication**: JWTs help verify the identity of a user or a client.
+2. **Authorization**: JWTs determine what actions a user or client is allowed to perform.
+
+### Components of a JWT
+
+- **Header**: Contains metadata about the token, such as the type of token and the signing algorithm being used.
+- **Payload**: Contains claims or statements about an entity (typically the user) and additional data. Common claims include user ID, username, and expiration time.
+- **Signature**: Ensures that the sender of the JWT is who they claim to be and that the message has not been altered.
+
+### Important Note:
+
+Tokens like JWTs are typically not stored in the database along with other user details. Instead, they are issued by the server during the authentication process and then stored on the client side (e.g., in cookies or local storage) for later use.
+
+### Step 1: Install JWT
+
+To start using JWT, install the `jsonwebtoken` package:
+
+```bash
+npm i jsonwebtoken
+```
+
+### Step 2: Modify `auth-controller.js` to Generate JWT
+
+Now, update the `auth-controller.js` file to generate and send a JWT when a user registers:
+
+```js
+const User = require('../models/user-model');
+const bcrypt = require("bcryptjs");
+
+const register = async (req, res) => {
+    try {
+        const { username, email, phone, password } = req.body;
+
+        if (!username || !email || !phone || !password) {
+            return res.status(400).json({ message: "Please fill all the fields" });
+        }
+
+        const userExists = await User.findOne({ email: email });
+        if (userExists) {
+            return res.status(400).json({ message: "User already exists" });
+        }
+
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(String(password), saltRounds);
+
+        // Create a new user
+        const user = await User.create({
+            username,
+            email,
+            phone,
+            password: hashedPassword,
+        });
+
+        // Generate JWT Token
+        const token = await user.generateToken();
+
+        res.status(201).json({
+            message: "User registered successfully",
+            createdUser: user,
+            token: token,
+            userId: user._id.toString(),
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+module.exports = { register };
+```
+
+### Step 3: Add `generateToken` Method in `user-model.js`
+
+Next, head over to `user-model.js` and add a method to generate a JWT:
+
+```js
+const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+
+const userSchema = new mongoose.Schema({
+  username: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  phone: { type: Number, required: true },
+  password: { type: String, required: true },
+  isAdmin: { type: Boolean, default: false },
+});
+
+userSchema.methods.generateToken = function() {
+  try {
+    const token = jwt.sign(
+      { _id: this._id, email: this.email, isAdmin: this.isAdmin },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+    return token;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+const User = mongoose.model("User", userSchema);
+module.exports = User;
+```
+
+### Step 4: Add JWT Secret Key to `.env` File
+
+Finally, add your JWT secret key to your `.env` file:
+
+```bash
+JWT_SECRET=your_secret_key
+```
+
+Note : A **secret key** is a unique string used to sign and verify JWTs, ensuring their authenticity and integrity. It protects against unauthorized access by allowing the server to confirm that the token hasn't been tampered with.
+
+### Step 5: Testing JWT in Postman
+
+After these changes, you can register a user via Postman. The response should include a JWT token, which you can use for authentication in future requests.
+
+#### Screenshot Reference:
+
+- **JWT Token in Postman**: 
+  - ![JWT Token](./screenshots/jwt.png)
+
+### Conclusion:
+
+By using JSON Web Tokens (JWT), you've added an extra layer of security to your user authentication process. JWTs are an effective and scalable solution for managing user sessions in modern web applications.
 
