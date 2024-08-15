@@ -1,29 +1,15 @@
 const express = require('express');
-
 const router = express.Router();
-
-
-/* First Way of writing the code
-router.get('/', (req, res) => {
-    res.send('Hello World using Router');
-})
-*/
-
-// You can also write the above code as below:
-// router.route('/')
-//     .get((req, res) => {
-//         res.send('Hello World using Router');
-//     })
-
-
 const { home, register, login } = require('../controllers/auth-controller');
+const { SignUpSchema } = require('../validators/auth-validator');
+const validate = require('../middlewares/validate-middleware');
 
 router.route('/')
     .get(home);
 
 
 router.route('/register')
-    .post(register);
+    .post(validate(SignUpSchema), register); // Middleware to validate the request body
 
 router.route('/login')
     .post(login);

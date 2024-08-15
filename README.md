@@ -840,8 +840,120 @@ const login = async (req, res) => {
 module.exports = { home, register, login };
 ```
 
-### Screenshot of the Login Route in Action
+### Screenshot of the Login Route in Postman
 - ![Login](./screenshots/login_route.png)
 
 
+## Day 10 - Validation using Zod
+
+Today, we’re focusing on implementing validation using **Zod**, a TypeScript-first schema declaration and validation library. Zod is designed to provide an easy-to-use and powerful way to validate data in JavaScript and TypeScript projects. It allows you to define schemas for your data and validate them with a simple API.
+
+### What is Zod?
+
+Zod is a schema validation library that provides a type-safe way to validate and parse data. It supports a wide range of validation features, including string, number, array, object validation, and more. Zod is particularly useful when you want to ensure that data conforms to a specific structure or set of rules, making it ideal for validating request bodies, query parameters, and other inputs in your applications.
+
+### How Zod Works
+
+1. **Define Schemas**: You define schemas that describe the expected shape and constraints of your data.
+2. **Parse and Validate**: You use these schemas to parse and validate incoming data. If the data does not meet the schema’s requirements, Zod throws a detailed error.
+3. **Handle Errors**: You catch and handle validation errors to provide meaningful feedback to users.
+
+### Steps to Implement Validation
+
+#### 1. Install Zod
+
+First, install Zod in your project:
+
+```bash
+npm i zod
+```
+
+#### 2. Create Validator Schema
+
+Create a folder named `validator` in the backend directory. Inside this folder, create a file named `auth-validator.js` with the following content:
+
+```js
+const { z } = require('zod');
+
+const SignUpSchema = z.object({
+    username: z
+        .string({ required_error: "Username is required" })
+        .trim()
+        .min(3, { message: "Username must be at least 3 characters long" })
+        .max(255, { message: "Username must be at most 255 characters long" }),
+
+    email: z
+        .string({ required_error: "Email is required" })
+        .trim()
+        .min(3, { message: "Email must be at least 3 characters long" })
+        .max(255, { message: "Email must be at most 255 characters long" })
+        .email({ message: "Invalid email address", tldWhitelist: ["com", "net"] }),
+
+    phone: z
+        .string({ required_error: "Phone is required" })
+        .trim()
+        .min(10, { message: "Phone must be at least 10 characters long" })
+        .max(15, { message: "Phone must be at most 15 characters long" })
+        .regex(/^\d+$/, { message: "Phone must contain only digits" }),
+
+    password: z
+        .string({ required_error: "Password is required" })
+        .min(6, { message: "Password must be at least 6 characters long" })
+        .max(255, { message: "Password must be at most 255 characters long" }),
+});
+
+module.exports = { SignUpSchema };
+```
+
+#### 3. Create Validation Middleware
+
+Create a folder named `middlewares` and add a file named `validate-middleware.js`:
+
+```js
+const validate = (Schema) => async (req, res, next) => {
+    try {
+        const parsedBody = Schema.parse(req.body); // Validate the request body
+        req.body = parsedBody; // Overwrite the request body with the parsed data
+        next(); // Move to the next middleware or route handler
+    } catch (error) {
+        res.status(400).json({
+            message: "Validation Failed",
+            errors: error.errors // Detailed errors from Zod
+        });
+    }
+};
+
+module.exports = validate;
+```
+
+#### 4. Update Routes
+
+Integrate the validation middleware into your routes. Open `auth-router.js` and update it as follows:
+
+```js
+const express = require('express');
+const router = express.Router();
+const { home, register, login } = require('../controllers/auth-controller');
+const { SignUpSchema } = require('../validators/auth-validator');
+const validate = require('../middlewares/validate-middleware');
+
+router.route('/')
+    .get(home);
+
+router.route('/register')
+    .post(validate(SignUpSchema), register); // Add validation middleware here
+
+router.route('/login')
+    .post(login);
+
+module.exports = router;
+```
+
+### Screenshot of Zod Validation Errors in Postman
+
+![zod validation errors in postman](./screenshots/zod.png)
+
+### Summary
+
+By following these steps, you’ve integrated Zod validation into your Express application. This setup ensures that incoming data is validated according to the defined schema, providing robust error handling and improving data integrity in your application.
 
