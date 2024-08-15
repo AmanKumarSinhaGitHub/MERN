@@ -16,7 +16,7 @@ router.get('/', (req, res) => {
 //     })
 
 
-const { home, register } = require('../controllers/auth-controller');
+const { home, register, login } = require('../controllers/auth-controller');
 
 router.route('/')
     .get(home);
@@ -24,6 +24,9 @@ router.route('/')
 
 router.route('/register')
     .post(register);
+
+router.route('/login')
+    .post(login);
 
 
 module.exports = router;

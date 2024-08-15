@@ -658,10 +658,6 @@ After implementing the changes, you can test the registration functionality agai
 
 By hashing passwords before storing them, you've taken an essential step toward securing user data in your application. Bcrypt.js is a widely-used and trusted library for password hashing, making it an excellent choice for this task.
 
-Here's the improved and detailed version for **Day 8**:
-
----
-
 ## Day 8 - Secure User Authentication with JSON Web Token (JWT)
 
 JSON Web Tokens (JWT) are an open standard (RFC 7519) that defines a compact and self-contained way of securely transmitting information between parties as a JSON object. JWTs are widely used for authentication and authorization in web applications.
@@ -694,46 +690,46 @@ npm i jsonwebtoken
 Now, update the `auth-controller.js` file to generate and send a JWT when a user registers:
 
 ```js
-const User = require('../models/user-model');
+const User = require("../models/user-model");
 const bcrypt = require("bcryptjs");
 
 const register = async (req, res) => {
-    try {
-        const { username, email, phone, password } = req.body;
+  try {
+    const { username, email, phone, password } = req.body;
 
-        if (!username || !email || !phone || !password) {
-            return res.status(400).json({ message: "Please fill all the fields" });
-        }
-
-        const userExists = await User.findOne({ email: email });
-        if (userExists) {
-            return res.status(400).json({ message: "User already exists" });
-        }
-
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(String(password), saltRounds);
-
-        // Create a new user
-        const user = await User.create({
-            username,
-            email,
-            phone,
-            password: hashedPassword,
-        });
-
-        // Generate JWT Token
-        const token = await user.generateToken();
-
-        res.status(201).json({
-            message: "User registered successfully",
-            createdUser: user,
-            token: token,
-            userId: user._id.toString(),
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Server error" });
+    if (!username || !email || !phone || !password) {
+      return res.status(400).json({ message: "Please fill all the fields" });
     }
+
+    const userExists = await User.findOne({ email: email });
+    if (userExists) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(String(password), saltRounds);
+
+    // Create a new user
+    const user = await User.create({
+      username,
+      email,
+      phone,
+      password: hashedPassword,
+    });
+
+    // Generate JWT Token
+    const token = await user.generateToken();
+
+    res.status(201).json({
+      message: "User registered successfully",
+      createdUser: user,
+      token: token,
+      userId: user._id.toString(),
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 module.exports = { register };
@@ -755,7 +751,7 @@ const userSchema = new mongoose.Schema({
   isAdmin: { type: Boolean, default: false },
 });
 
-userSchema.methods.generateToken = function() {
+userSchema.methods.generateToken = function () {
   try {
     const token = jwt.sign(
       { _id: this._id, email: this.email, isAdmin: this.isAdmin },
@@ -789,10 +785,63 @@ After these changes, you can register a user via Postman. The response should in
 
 #### Screenshot Reference:
 
-- **JWT Token in Postman**: 
+- **JWT Token in Postman**:
   - ![JWT Token](./screenshots/jwt.png)
 
 ### Conclusion:
 
 By using JSON Web Tokens (JWT), you've added an extra layer of security to your user authentication process. JWTs are an effective and scalable solution for managing user sessions in modern web applications.
+
+
+## Day 9 - User Login Route
+
+To implement user login functionality, add the following route in `auth-router.js`:
+
+```js
+router.route("/login").post(login);
+```
+
+In `auth-controller.js`, define the `login` function:
+
+```js
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Check if any field is empty
+    if (!email || !password) {
+      return res.status(400).json({ message: "Please fill all the fields" });
+    }
+
+    // Check if the user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid Credentials" });
+    }
+
+    // Compare the password
+    const isPasswordValid = await bcrypt.compare(String(password), user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Username or Password is Incorrect" });
+    }
+
+    // Successful login, return JWT
+    res.status(200).json({
+      message: "User logged in successfully",
+      token: await user.generateToken(),
+      userId: user._id.toString(),
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error. Please try again later." });
+  }
+};
+
+module.exports = { home, register, login };
+```
+
+### Screenshot of the Login Route in Action
+- ![Login](./screenshots/login_route.png)
+
+
 

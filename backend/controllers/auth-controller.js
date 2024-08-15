@@ -43,7 +43,7 @@ const register = async (req, res) => {
             createdUser: user,
             token: await user.generateToken(),
             userId: user._id.toString(),
-          });
+        });
 
         console.log(user);
     } catch (error) {
@@ -52,4 +52,42 @@ const register = async (req, res) => {
     }
 }
 
-module.exports = { home, register };
+
+const login = async (req, res) => {
+    try {
+        console.log(req.body);
+        let { email, password } = req.body;
+
+        // Check if any field is empty
+        if (!email || !password) {
+            return res.status(400).json({ message: "Please fill all the fields" });
+        }
+
+        // Check if the user exists (email)
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(400).json({ message: "Invalid Credentials" });
+        }
+
+        // Compare the password
+        const isPasswordValid = await bcrypt.compare(String(password), user.password);
+
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: "Username or Password is Incorrect" });
+        }
+
+        res.status(201).json({
+            message: "User logged in successfully",
+            token: await user.generateToken(),
+            userId: user._id.toString(),
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error. Please try again later." });
+    }
+};
+
+// export
+module.exports = { home, register, login };
