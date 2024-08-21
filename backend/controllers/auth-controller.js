@@ -5,7 +5,8 @@ const home = async (req, res) => {
     try {
         res.send("Welcome to the home page using controller");
     } catch (error) {
-        console.error(error);
+        // console.error(error);
+        next(error);
     }
 }
 
@@ -48,7 +49,8 @@ const register = async (req, res) => {
         console.log(user);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Server error. Please try again later." });
+        // res.status(500).json({ message: "Server error. Please try again later." });
+        next(error);
     }
 }
 
@@ -85,7 +87,8 @@ const login = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Server error. Please try again later." });
+        // res.status(500).json({ message: "Server error. Please try again later." });
+        next(error);
     }
 };
 

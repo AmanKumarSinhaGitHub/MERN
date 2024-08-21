@@ -949,7 +949,7 @@ router.route('/login')
 module.exports = router;
 ```
 
-### Screenshot of Zod Validation Errors in Postman
+#### Zod Validation Errors in Postman
 
 ![zod validation errors in postman](./screenshots/zod.png)
 
@@ -957,3 +957,126 @@ module.exports = router;
 
 By following these steps, you’ve integrated Zod validation into your Express application. This setup ensures that incoming data is validated according to the defined schema, providing robust error handling and improving data integrity in your application.
 
+## Day 11 - Express Error Handling Middleware
+
+Today’s focus was on implementing centralized error handling in an Express.js application using a custom error middleware. This approach allows you to manage all errors from a single place, enhancing code maintainability and readability.
+
+### Key Concepts
+
+- **Error Middleware:** A special type of middleware in Express that handles errors thrown in the application, simplifying error management.
+- **Centralized Error Handling:** Allows catching and responding to errors from a single location, improving maintainability.
+
+### Implementation Steps
+
+1. **Create the Error Middleware:**
+
+   In the `middlewares` folder, create a file named `error-middleware.js`:
+
+   ```js
+   const errorMiddleware = (err, req, res, next) => {
+       const status = err.status || 500;
+       const message = err.message || "Something went wrong. Server error. Please try again later.";
+       res.status(status).json({ message });
+   };
+
+   module.exports = errorMiddleware;
+   ```
+
+2. **Modify Your Controllers:**
+
+   Replace `catch` blocks with `next(error)` to delegate error handling to the middleware. For example, in `auth-controller.js`:
+
+   ```js
+   const register = async (req, res, next) => {
+       try {
+           const { username, email, phone, password } = req.body;
+
+           if (!username || !email || !phone || !password) {
+               return res.status(400).json({ message: "Please fill all the fields" });
+           }
+
+           const userExists = await User.findOne({ email });
+           if (userExists) {
+               return res.status(400).json({ message: "User already exists" });
+           }
+
+           const saltRound = 10;
+           const hashedPassword = await bcrypt.hash(String(password), saltRound);
+
+           const user = await User.create({
+               username,
+               email,
+               phone,
+               password: hashedPassword
+           });
+
+           res.status(201).json({
+               message: "User registered successfully",
+               createdUser: user,
+               token: await user.generateToken(),
+               userId: user._id.toString(),
+           });
+       } catch (error) {
+           next(error); // Pass the error to the middleware
+       }
+   };
+   ```
+
+3. **Update the Validate Middleware:**
+
+   Update the validation middleware to send errors to the error middleware:
+
+   ```js
+   const validate = (Schema) => async (req, res, next) => {
+       try {
+           const parsedBody = Schema.parse(req.body);
+           req.body = parsedBody;
+           next();
+       } catch (error) {
+           next({
+               status: 400,
+               message: error.errors
+           });
+       }
+   };
+
+   module.exports = validate;
+   ```
+
+4. **Integrate the Middleware:**
+
+   Finally, make sure to include the error middleware in `index.js`:
+
+   ```js
+   require('dotenv').config();
+   const express = require('express');
+   const app = express();
+   const router = require('./router/auth-router');
+   const connectDB = require('./utils/db');
+   const errorMiddleware = require('./middlewares/error-middleware');
+
+   app.use(express.json());
+   app.use('/api/auth', router);
+
+   app.get('/', (req, res) => {
+       res.send('Hello World');
+   });
+
+   app.use(errorMiddleware); // This must be just above the connection
+
+   connectDB()
+       .then(() => {
+           const PORT = process.env.PORT || 3000;
+           app.listen(PORT, () => {
+               console.log(`Server is running on port ${PORT}`);
+           });
+       })
+       .catch((err) => {
+           console.error('Database connection failed', err);
+           process.exit(1);
+       });
+   ```
+
+### Summary
+
+By setting up a centralized error handling middleware in Express, you can efficiently manage errors across your application, improving the reliability and readability of your code.
