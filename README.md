@@ -1080,3 +1080,194 @@ Today’s focus was on implementing centralized error handling in an Express.js 
 ### Summary
 
 By setting up a centralized error handling middleware in Express, you can efficiently manage errors across your application, improving the reliability and readability of your code.
+
+
+## Day 12 - Contact Form (Schema, Route & Logics)
+
+Today’s focus was on implementing a contact form in an Express.js application. This included creating a Mongoose schema, setting up routes, and defining the logic for handling form submissions.
+
+### Key Concepts
+
+- **Mongoose Schema:** Defines the structure of the data for MongoDB.
+- **Express Routes:** Handles incoming requests and integrates with controllers.
+- **Error Handling:** Manages and logs errors during form submission.
+
+### Implementation Steps
+
+#### 1. Define the Mongoose Schema
+
+Create a schema for the contact form data in `models/contact-form-model.js`:
+
+```js
+const mongoose = require('mongoose');
+
+const contactFormSchema = new mongoose.Schema({
+    email: {
+        type: String,
+        required: true,
+    },
+    subject: {
+        type: String,
+        required: true,
+    },
+    message: {
+        type: String,
+        required: true
+    },
+});
+
+const ContactForm = mongoose.model('ContactForm', contactFormSchema);
+module.exports = ContactForm;
+```
+
+**Note:** Ensure that the `email` field is not unique if you want to allow multiple submissions with the same email address.
+
+#### 2. Create the Contact Form Controller
+
+Implement the logic to handle form submissions in `controllers/contact-controller.js`:
+
+```js
+const Contact = require('../models/contact-form-model');
+
+const contactForm = async (req, res, next) => {
+    try {
+        console.log(req.body);
+
+        const { email, subject, message } = req.body;
+
+        // Check if any field is empty
+        if (!email || !subject || !message) {
+            return res.status(400).json({ message: "Please fill all the fields" });
+        }
+
+        // Create a new form data
+        const contactData = await Contact.create({
+            email,
+            subject,
+            message
+        });
+
+        res.status(201).json({
+            message: "Form Submitted Successfully",
+            formData: contactData,
+        });
+
+        console.log(contactData);
+
+    } catch (error) {
+        console.error(error);
+        next(error); // Pass the error to the middleware
+    }
+};
+
+module.exports = { contactForm };
+```
+
+#### 3. Set Up the Route
+
+Define the route to handle contact form submissions in `router/contact-router.js`:
+
+```js
+const express = require('express');
+const router = express.Router();
+const { contactForm } = require('../controllers/contact-controller');
+const { ContactFormSchema } = require('../validators/contact-form-validator');
+const validate = require('../middlewares/validate-middleware');
+
+router.route('/contact')
+    .post(validate(ContactFormSchema), contactForm); // Middleware to validate the request body
+
+module.exports = router;
+```
+
+#### 4. Create Validation Schema
+
+Implement the validation logic for the contact form data in `validators/contact-form-validator.js`:
+
+```js
+const { z } = require('zod');
+
+const ContactFormSchema = z.object({
+    email: z
+        .string({ required_error: "Email is required" })
+        .trim()
+        .min(3, { message: "Email must be at least 3 characters long" })
+        .max(255, { message: "Email must be at most 255 characters long" })
+        .email({ message: "Invalid email address", tldWhitelist: ["com", "net"] }),
+
+    subject: z
+        .string({ required_error: "Subject is required" })
+        .trim()
+        .min(3, { message: "Subject must be at least 3 characters long" })
+        .max(255, { message: "Subject must be at most 255 characters long" }),
+
+    message: z
+        .string({ required_error: "Message is required" })
+        .trim()
+        .min(3, { message: "Message must be at least 3 characters long" })
+        .max(255, { message: "Message must be at most 255 characters long" }),
+});
+
+module.exports = { ContactFormSchema };
+```
+
+#### 5. Update Main Application File
+
+Ensure the contact route is integrated into your main application file `index.js`:
+
+```js
+require('dotenv').config();
+const express = require('express');
+const app = express();
+const authRoute = require('./router/auth-router');
+const contactRoute = require('./router/contact-router');
+const connectDB = require('./utils/db');
+const errorMiddleware = require('./middlewares/error-middleware');
+
+// Middleware
+app.use(express.json());
+app.use('/api/auth', authRoute);
+app.use('/api/form', contactRoute);
+
+app.get('/', (req, res) => {
+    res.send('Hello World');
+});
+
+app.use(errorMiddleware); // This must be just above the connection
+
+// Connect to the database and start the server
+connectDB()
+    .then(() => {
+        const PORT = process.env.PORT || 3000;
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    })
+    .catch((err) => {
+        console.error('Database connection failed', err);
+        process.exit(1);
+    });
+```
+
+### Testing
+
+To test the contact form, use Postman to send a POST request to `http://localhost:3000/api/form/contact` with the following JSON body:
+
+```json
+{
+    "email": "example@example.com",
+    "subject": "Test Subject",
+    "message": "This is a test message."
+}
+```
+
+- For visual reference, check the screenshots provided:
+
+- ![Contact Form Testing Postman](./screenshots/contactFormPostman.png)
+
+
+### Summary
+
+In this setup, we created a contact form feature that includes a Mongoose schema, an Express route, and validation logic. The contact form allows users to submit their email, subject, and message, and the data is stored in MongoDB.
+
+This centralized approach to handling form submissions, including validation and error management, helps maintain clean and organized code.
