@@ -1271,3 +1271,77 @@ To test the contact form, use Postman to send a POST request to `http://localhos
 In this setup, we created a contact form feature that includes a Mongoose schema, an Express route, and validation logic. The contact form allows users to submit their email, subject, and message, and the data is stored in MongoDB.
 
 This centralized approach to handling form submissions, including validation and error management, helps maintain clean and organized code.
+
+
+## Day 13 - Installing ReactJS
+
+First cd to frontend 
+and then enter rhe command
+
+```bash
+npm create vite@latest .
+```
+
+Select a framework : react
+Select a varient : Javascript
+
+then run
+
+```bash
+npm install
+npm run dev
+```
+
+Now install tailwind css
+
+```bash
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+```
+
+Add contnet in ```tailwind.config.js```
+
+```js
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+
+```
+
+And then in ```index.css``` clean all the css and write this
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+And in ```App.jsx``` write this and check whether tailwind is setup correctly or not
+
+```jsx
+import "./App.css";
+
+const App = () => {
+  return (
+    <>
+      <h1 className="text-3xl font-bold underline">Hello world!</h1>
+    </>
+  );
+};
+
+export default App;
+```
+
+Run the app and see the result
+
+```bash
+npm run dev
+```
