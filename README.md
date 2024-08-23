@@ -1273,75 +1273,84 @@ In this setup, we created a contact form feature that includes a Mongoose schema
 This centralized approach to handling form submissions, including validation and error management, helps maintain clean and organized code.
 
 
+
 ## Day 13 - Installing ReactJS
 
-First cd to frontend 
-and then enter rhe command
+### Step 1: Set Up the ReactJS Project
 
-```bash
-npm create vite@latest .
-```
+1. **Navigate to the frontend directory**:
+    ```bash
+    cd frontend
+    ```
 
-Select a framework : react
-Select a varient : Javascript
+2. **Create a new React project using Vite**:
+    ```bash
+    npm create vite@latest .
+    ```
 
-then run
+3. **Configuration**:
+    - Select a framework: **React**
+    - Select a variant: **JavaScript**
 
-```bash
-npm install
-npm run dev
-```
+4. **Install dependencies and start the development server**:
+    ```bash
+    npm install
+    npm run dev
+    ```
 
-Now install tailwind css
+### Step 2: Install and Configure Tailwind CSS
 
-```bash
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
-```
+1. **Install Tailwind CSS and its dependencies**:
+    ```bash
+    npm install -D tailwindcss postcss autoprefixer
+    npx tailwindcss init -p
+    ```
 
-Add contnet in ```tailwind.config.js```
+2. **Configure Tailwind in `tailwind.config.js`**:
+    ```js
+    /** @type {import('tailwindcss').Config} */
+    export default {
+      content: [
+        "./index.html",
+        "./src/**/*.{js,ts,jsx,tsx}",
+      ],
+      theme: {
+        extend: {},
+      },
+      plugins: [],
+    }
+    ```
 
-```js
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-}
+3. **Update `index.css` to use Tailwind’s base, components, and utilities**:
+    ```css
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
+    ```
 
-```
+### Step 3: Test Tailwind CSS Installation
 
-And then in ```index.css``` clean all the css and write this
+1. **Update `App.jsx` to include a test component**:
+    ```jsx
+    import "./App.css";
 
-```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-```
+    const App = () => {
+      return (
+        <>
+          <h1 className="text-3xl font-bold underline">Hello world!</h1>
+        </>
+      );
+    };
 
-And in ```App.jsx``` write this and check whether tailwind is setup correctly or not
+    export default App;
+    ```
 
-```jsx
-import "./App.css";
+2. **Run the development server to verify the setup**:
+    ```bash
+    npm run dev
+    ```
 
-const App = () => {
-  return (
-    <>
-      <h1 className="text-3xl font-bold underline">Hello world!</h1>
-    </>
-  );
-};
+After following these steps, you should see "Hello world!" styled with Tailwind CSS on your browser, indicating that your ReactJS environment is successfully set up.
 
-export default App;
-```
 
-Run the app and see the result
 
-```bash
-npm run dev
-```
