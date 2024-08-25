@@ -1354,3 +1354,279 @@ After following these steps, you should see "Hello world!" styled with Tailwind 
 
 
 
+## Day 14 - Page Navigation with React Router DOM
+
+Today, we're learning how to create a multi-page application in React using **React Router DOM**. This will allow us to navigate between different pages without reloading the browser.
+
+### What You’ll Learn
+- **React Router DOM basics**: How to set up and use React Router for page navigation.
+- **Creating a simple layout**: Adding a Header, Footer, and dynamic content area.
+- **Routing in React**: Displaying different components based on the URL path.
+
+Let’s break it down step by step!
+
+### Step 1: Installing React Router DOM
+
+First, we need to install `react-router-dom`, a package that handles routing in React applications.
+
+#### Installation Command
+Open your terminal and run:
+
+```bash
+npm install react-router-dom
+```
+
+This command installs the necessary library, enabling us to set up navigation between different pages in our React app.
+
+### Step 2: Creating Page Components
+
+We'll create three simple pages: Home, About, and Contact. These will be the different pages that users can navigate to.
+
+#### Folder Structure
+1. Inside the `src` directory, create a new folder named `pages`.
+2. In the `pages` folder, create three files: `Home.jsx`, `About.jsx`, and `Contact.jsx`.
+
+#### Writing Page Components
+
+**Home.jsx:**
+
+```jsx
+const Home = () => {
+  return (
+    <div>
+      <h1 className="m-3">Home Page</h1>
+    </div>
+  );
+};
+
+export default Home;
+```
+
+**About.jsx:**
+
+```jsx
+const About = () => {
+  return (
+    <div>
+      <h1 className="m-3">About Page</h1>
+    </div>
+  );
+};
+
+export default About;
+```
+
+**Contact.jsx:**
+
+```jsx
+const Contact = () => {
+  return (
+    <div>
+      <h1 className="m-3">Contact Page</h1>
+    </div>
+  );
+};
+
+export default Contact;
+```
+
+#### Explanation:
+- Each file contains a simple functional component. A functional component is just a JavaScript function that returns some JSX (HTML-like syntax).
+- We’re keeping the pages simple with just a heading for now. The goal is to understand routing.
+
+### Step 3: Creating Header and Footer Components
+
+Now, let’s create a navigation menu (Header) and a Footer that will appear on every page.
+
+#### Folder Structure
+1. Inside the `src` directory, create another folder named `components`.
+2. In the `components` folder, create two files: `Header.jsx` and `Footer.jsx`.
+
+#### Writing Header and Footer Components
+
+**Header.jsx:**
+
+```jsx
+// Importing NavLink from React Router to create navigation links
+import { NavLink } from "react-router-dom";
+
+const Header = () => {
+  return (
+    <header className="w-full">
+      <nav className="bg-white text-lg">
+        
+        <ul className="flex font-medium">
+          <li className="m-3">
+            <NavLink
+              to="/"
+              className={({ isActive }) =>
+                `py-2 ${isActive ? "text-orange-700" : "text-gray-700"}`
+              }
+            >
+              Home
+            </NavLink>
+          </li>
+          <li className="m-3">
+            <NavLink
+              to="/about"
+              className={({ isActive }) =>
+                `py-2 ${isActive ? "text-orange-700" : "text-gray-700"}`
+              }
+            >
+              About
+            </NavLink>
+          </li>
+          <li className="m-3">
+            <NavLink
+              to="/contact"
+              className={({ isActive }) =>
+                `py-2 ${isActive ? "text-orange-700" : "text-gray-700"}`
+              }
+            >
+              Contact
+            </NavLink>
+          </li>
+        </ul>
+      </nav>
+    </header>
+  );
+};
+
+export default Header;
+```
+
+#### Explanation:
+- **NavLink:** This component works like an anchor (`<a>`) tag but with additional features from React Router. It helps you create navigation links that are aware of the active route.
+- **Dynamic Styling:** The function inside `className` checks if the link is active. If it is, the link text turns orange; otherwise, it remains gray.
+
+**Footer.jsx:**
+
+```jsx
+const Footer = () => {
+  return (
+    <div className="m-3">
+      Footer
+    </div>
+  );
+};
+
+export default Footer;
+```
+
+The `Footer.jsx` component is simple and straightforward, just displaying a footer message.
+
+### Step 4: Setting Up the Main Application Layout
+
+The `App.jsx` file will act as our main layout. It will include the Header, Footer, and a dynamic content area where different pages will be displayed.
+
+#### Updating `App.jsx`
+
+Replace the existing content in `App.jsx` with the following:
+
+```jsx
+// Importing outlet
+import { Outlet } from "react-router-dom";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import "./App.css";
+
+const App = () => {
+  return (
+    <>
+      {/* Header at the top of every page */}
+      <Header />
+      {/* Outlet to render the current page */}
+      <Outlet />
+      {/* Footer at the bottom of every page */}
+      <Footer />
+    </>
+  );
+};
+
+export default App;
+```
+
+#### Explanation:
+- **Header & Footer:** These components are included so they appear on every page.
+- **Outlet:** This is a placeholder where the current page content (like Home, About, or Contact) will be displayed based on the active route.
+
+### Step 5: Defining Routes in `main.jsx`
+
+Now, let’s set up our routes to connect the URLs with the pages we’ve created.
+
+#### Updating `main.jsx`
+
+Replace the existing content in `main.jsx` with the following:
+
+```jsx
+
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App.jsx";
+import "./index.css";
+
+// Import necessary modules 
+import {
+  Route,
+  RouterProvider,
+  createBrowserRouter,
+  createRoutesFromElements,
+} from "react-router-dom";
+
+import Home from "./pages/Home.jsx";
+import About from "./pages/About.jsx";
+import Contact from "./pages/Contact.jsx";
+
+// Define the routes for the application
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path="/" element={<App />}>
+      {/* Home route */}
+      <Route path="" element={<Home />} />
+      {/* About route */}
+      <Route path="/about" element={<About />} />
+      {/* Contact route */}
+      <Route path="/contact" element={<Contact />} />
+    </Route>
+  )
+);
+
+createRoot(document.getElementById("root")).render(
+  <StrictMode>
+    {/* Provide the router configuration to the application */}
+    <RouterProvider router={router} />
+  </StrictMode>
+);
+```
+
+#### Explanation:
+- **Route Configuration:** The `Route` component connects each URL path to a specific component. For example, when the user navigates to `/about`, the `About` component is displayed.
+- **Nested Routes:** The `App` component serves as a parent route, so `Header` and `Footer` are always shown, and the `Outlet` dynamically loads the current page based on the route.
+
+### Step 6: Testing the Application
+
+Now that everything is set up, let’s test it out!
+
+#### Running the Application
+1. **Start the Development Server:**
+    ```bash
+    npm run dev
+    ```
+   This command starts the React development server.
+
+2. **Open the Browser:**
+   - Navigate to `http://localhost:3000/` in your web browser. You should see the Home page.
+
+3. **Navigate Between Pages:**
+   - Click on the "About" link in the Header to navigate to the About page.
+   - Click on the "Contact" link to navigate to the Contact page.
+   - Notice how the URL changes, but the page doesn’t reload—this is the magic of React Router!
+
+### Recap & Conclusion
+
+Well done! 🎉 You’ve successfully created a multi-page React application with seamless navigation. Here's a quick recap of what you learned today:
+- **React Router DOM Basics:** You learned how to install and set up routing in a React app.
+- **Creating a Layout:** You built a consistent layout with a Header and Footer across all pages.
+- **Dynamic Navigation:** You used `NavLink` to highlight the current page and make navigation intuitive.
+
+This knowledge is crucial for building real-world React applications. Keep experimenting with routing, and soon you'll be building even more dynamic and complex apps! 🚀
