@@ -1559,7 +1559,6 @@ Now, let’s set up our routes to connect the URLs with the pages we’ve create
 Replace the existing content in `main.jsx` with the following:
 
 ```jsx
-
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
@@ -1630,3 +1629,180 @@ Well done! 🎉 You’ve successfully created a multi-page React application wit
 - **Dynamic Navigation:** You used `NavLink` to highlight the current page and make navigation intuitive.
 
 This knowledge is crucial for building real-world React applications. Keep experimenting with routing, and soon you'll be building even more dynamic and complex apps! 🚀
+
+For more knowledge about React Router DOM, do checkout this repo : [React Router Crash Course](https://github.com/AmanKumarSinhaGitHub/React-Router-Crash-Course)
+
+## Day 15 - Registration Form in React JS
+
+In this lesson, we'll build a simple registration form in React JS and add navigation for the form. This tutorial will guide you step-by-step, making sure that even if you’re new to React, you’ll understand each part clearly.
+
+### Step 1: Adding a NavLink for the Registration Page
+
+We start by adding a new navigation link that points to our registration page. This will allow users to easily navigate to the registration form from the website's header.
+
+#### Update `Header.jsx`
+
+Add a new NavLink for the `/register` page:
+
+```jsx
+<NavLink
+  to="/register"
+  className={({ isActive }) =>
+    `py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
+  }
+>
+  Register
+</NavLink>
+```
+
+#### Explanation:
+- **`NavLink` Component:** Used to create navigation links in React. The `to` prop specifies the URL path, and the `className` applies styles dynamically based on whether the link is active.
+- **Dynamic Styling:** The `className` uses `isActive` to highlight the link when the user is on the corresponding page.
+
+### Step 2: Adding a Route for the Registration Page
+
+Next, we need to define a route for our new registration page so that React Router knows what to display when the user navigates to `/register`.
+
+#### Update `main.jsx`
+
+Add the route for the registration page:
+
+```jsx
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path="/" element={<App />}>
+      <Route path="" element={<Home />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/register" element={<Register />} /> {/* Route for Register Page */}
+    </Route>
+  )
+);
+```
+
+#### Explanation:
+- **Route Setup:** We’re telling React Router to render the `Register` component when the user visits `/register`.
+
+### Step 3: Creating the Registration Page Component
+
+Let’s now create the registration page component. This component will contain a form where users can input their details like username, email, phone number, and password.
+
+#### Create `Register.jsx`
+
+Inside the `pages` folder, create a new file named `Register.jsx`:
+
+```jsx
+import { useState } from "react";
+
+const Register = () => {
+  // State to manage form data
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
+
+  // Handle input changes
+  const handleInput = (e) => {
+    const name = e.target.name; // Name of the input field
+    const value = e.target.value; // Value of the input field
+
+    // Update the formData state
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault(); // Prevent default form submission behavior
+    console.log("Form submitted:", formData);
+    // Here we will write logic to store data in backend
+  };
+
+  return (
+    <>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="username">Username</label>
+          <input
+            type="text"
+            name="username" // Field identifier
+            id="username"
+            value={formData.username} // State value
+            onChange={handleInput} // Update value
+            placeholder="Enter Username"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="email">Email</label>
+          <input
+            type="email"
+            name="email"
+            id="email"
+            value={formData.email}
+            onChange={handleInput}
+            placeholder="Enter Email"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="phone">Phone</label>
+          <input
+            type="text"
+            name="phone"
+            id="phone"
+            value={formData.phone}
+            onChange={handleInput}
+            placeholder="Enter Phone"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="password">Password</label>
+          <input
+            type="password"
+            name="password"
+            id="password"
+            value={formData.password}
+            onChange={handleInput}
+            placeholder="Enter Password"
+            required
+          />
+        </div>
+
+        <div>
+          <button type="submit">Register</button>
+        </div>
+      </form>
+    </>
+  );
+};
+
+export default Register;
+```
+
+#### Explanation:
+- **State Management with `useState`:** We use the `useState` hook to manage the form data, including the username, email, phone number, and password.
+- **Input Handling:** The `handleInput` function captures changes to the input fields and updates the state accordingly.
+- **Form Submission:** The `handleSubmit` function prevents the default form submission behavior and logs the form data to the console. In a real application, you’d replace this with logic to send the data to a backend server.
+
+### Step 4: Creating the Login Page (DIY)
+
+You’ve successfully created a registration form! Now, as a challenge, try creating a login form on your own. Here’s what you need to do:
+1. Add a NavLink for `/login` in `Header.jsx`.
+2. Create a `Login.jsx` component with form fields for email and password.
+3. Add a route for `/login` in `main.jsx`.
+
+**Reference Design**
+- ![Register](./screenshots/register.png)
+- ![Login](./screenshots/login.png)
+
+
+This guide should help you create a fully functional registration form with navigation. With React, once you understand the basic concepts like state management, routing, and component structure, you can build even more complex applications with ease!
