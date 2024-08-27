@@ -1,5 +1,15 @@
 const Footer = () => {
-  return <div className="m-3">Footer</div>;
+  return (
+    <footer className="mt-8 bg-gray-800 py-6 text-white">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-center">
+          <p className="text-sm">
+            &copy; {new Date().getFullYear()} Aman Kumar Sinha. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
 };
 
 export default Footer;
