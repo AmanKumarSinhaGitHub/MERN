@@ -1793,7 +1793,7 @@ export default Register;
 - **Input Handling:** The `handleInput` function captures changes to the input fields and updates the state accordingly.
 - **Form Submission:** The `handleSubmit` function prevents the default form submission behavior and logs the form data to the console. In a real application, you’d replace this with logic to send the data to a backend server.
 
-### Step 4: Creating the Login Page (DIY)
+### Step 4: Creating the Login Page and Contact Us Page (Do It Yoursef)
 
 You’ve successfully created a registration form! Now, as a challenge, try creating a login form on your own. Here’s what you need to do:
 1. Add a NavLink for `/login` in `Header.jsx`.
