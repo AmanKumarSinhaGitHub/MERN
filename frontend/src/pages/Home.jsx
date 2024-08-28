@@ -8,12 +8,6 @@ const Home = () => {
           <p className="text-xl mb-6">
             We provide innovative solutions and exceptional services tailored to your needs.
           </p>
-          <a
-            href="/services"
-            className="bg-white text-blue-600 py-3 px-6 rounded-lg font-semibold hover:bg-gray-100 transition duration-300"
-          >
-            Explore Our Services
-          </a>
         </div>
       </section>
 

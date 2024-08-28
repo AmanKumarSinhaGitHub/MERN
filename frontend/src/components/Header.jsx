@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,7 +13,9 @@ const Header = () => {
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex-shrink-0">
-            <h1 className="text-2xl font-bold text-white">Aman</h1>
+            <h1 className="text-2xl font-bold text-white">
+              <Link to="/">Aman</Link> 
+            </h1>
           </div>
           <div className="hidden md:block">
             <ul className="flex space-x-4 font-medium">
