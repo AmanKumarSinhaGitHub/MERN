@@ -1793,7 +1793,7 @@ export default Register;
 - **Input Handling:** The `handleInput` function captures changes to the input fields and updates the state accordingly.
 - **Form Submission:** The `handleSubmit` function prevents the default form submission behavior and logs the form data to the console. In a real application, you’d replace this with logic to send the data to a backend server.
 
-### Step 4: Creating the Login Page and Contact Us Page (Do It Yoursef)
+### Step 4: Creating the Login Page and Contact Us Page (Do It Yourself)
 
 You’ve successfully created a registration form! Now, as a challenge, try creating a login form on your own. Here’s what you need to do:
 1. Add a NavLink for `/login` in `Header.jsx`.
@@ -1806,3 +1806,61 @@ You’ve successfully created a registration form! Now, as a challenge, try crea
 
 
 This guide should help you create a fully functional registration form with navigation. With React, once you understand the basic concepts like state management, routing, and component structure, you can build even more complex applications with ease!
+
+
+## Day 16 - 404 Error Page (Page Not Found)
+
+Today, we are going to implement a basic 404 error page in our React application. This page will be displayed whenever a user tries to access a route that doesn't exist.
+
+### Step 1: Add the 404 Route in `main.jsx`
+
+First, we need to handle routes that don't match any of our defined paths by adding a wildcard (`*`) route in `main.jsx`.
+
+```jsx
+import Error from "./pages/Error.jsx"; // Import the Error page
+
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path="/" element={<App />}>
+      <Route path="" element={<Home />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/register" element={<Register />} /> 
+      <Route path="/login" element={<Login />} /> 
+      <Route path="*" element={<Error/>} /> {/* Catch-all route for 404 */}
+    </Route>
+  )
+);
+```
+
+### Step 2: Create the `Error.jsx` Component
+
+Next, we'll create a simple `Error.jsx` component in the `pages` folder. This component will display a "404 Not Found" message and a link to return to the homepage.
+
+```jsx
+import { Link } from "react-router-dom";
+
+const Error = () => {
+  return (
+    <>
+      <h1>404 Not Found</h1>
+      <p>Sorry, the page you're looking for doesn't exist.</p>
+      <Link to="/">Go back to the main page</Link> {/* Link to redirect user to home */}
+    </>
+  );
+};
+
+export default Error;
+```
+
+### Explanation:
+
+- **Wildcard Route (`*`)**: The `*` in the route path acts as a catch-all. Any path that doesn't match the defined routes will fall back to this route, triggering the `Error` component.
+
+- **Error Component**: The `Error.jsx` file is a simple functional component that renders a message informing the user that the page was not found and includes a link to return to the homepage.
+
+### Step 3: Test the 404 Page
+
+Now, if you try to access a route in your application that doesn't exist (e.g., `http://localhost:3000/some-random-route`), the 404 error page will be displayed.
+
+This setup ensures a smooth user experience by guiding users back to a valid part of your application if they land on an incorrect URL.
