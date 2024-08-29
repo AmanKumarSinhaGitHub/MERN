@@ -1864,3 +1864,171 @@ export default Error;
 Now, if you try to access a route in your application that doesn't exist (e.g., `http://localhost:3000/some-random-route`), the 404 error page will be displayed.
 
 This setup ensures a smooth user experience by guiding users back to a valid part of your application if they land on an incorrect URL.
+
+
+## Day 17 - Connect Frontend with Backend and Storing Registration Data
+
+On Day 17, we'll be connecting our frontend (React) to the backend (Express.js) to store user registration data in MongoDB. We'll cover how to set up the connection, handle CORS errors, and successfully send data from the frontend to the backend.
+
+### Prerequisites
+
+Ensure you have two terminals open in VS Code:
+
+1. Start the frontend with `npm run dev`.
+2. Start the backend with `nodemon index.js`.
+
+### Overview
+
+In the previous steps, we tested our backend using Postman to store data in MongoDB. Now, we'll connect the frontend to the backend to handle the same functionality using a registration form in React.
+
+### Step 1: Modify `Register.jsx`
+
+We'll update the `handleSubmit` function in `Register.jsx` to send the registration data to our backend.
+
+```jsx
+import { useState } from "react";
+import {useNavigate} from 'react-router-dom';
+
+const Register = () => {
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // Handle form submission logic here
+    console.log("Form submitted:", formData);
+
+    try{
+      const response = await fetch('http://localhost:3000/api/auth/register',
+        {
+          method:'POST',
+          headers: {
+            "Content-Type": "application/json" // Set content type to JSON
+          },
+          body: JSON.stringify(formData) // Convert JS object to JSON string
+        }
+      );
+      const data = await response.json();
+      console.log(data);
+
+      // Clearning the form after submission
+      if(response.ok){
+        setFormData({
+          username: "",
+          email: "",
+          phone: "",
+          password: "",
+        });
+
+        // Redirect to the login page
+        navigate('/login');
+    
+      }
+    }
+    catch(error){
+      console.error('Error:', error);
+    }
+  };
+
+  return (
+    
+    <form onSubmit={handleSubmit}>
+      {/* Form Input Fields here */}
+
+    </form>
+      
+  );
+};
+
+export default Register;
+
+```
+
+### Step 2: Handle CORS Errors
+
+When connecting the frontend with the backend, you might encounter a **CORS Policy Error**. This occurs because web browsers restrict cross-origin HTTP requests.
+
+#### Understanding CORS
+
+CORS (Cross-Origin Resource Sharing) is a security feature that allows or restricts web pages from making requests to a different domain. In a MERN stack application, this issue arises when the frontend and backend are hosted on different domains.
+
+#### Step 3: Install and Configure CORS
+
+To resolve the CORS issue, install the CORS package in the backend.
+
+1. **Install CORS**: Ensure you're in the backend directory and run the following command:
+   ```bash
+   npm i cors
+   ```
+
+2. **Configure CORS in `index.js`**: Add the following code to your `index.js` file:
+
+```js
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors'); // Import cors
+const app = express();
+const authRoute = require('./router/auth-router');
+const contactRoute = require('./router/contact-router');
+const connectDB = require('./utils/db');
+const errorMiddleware = require('./middlewares/error-middleware');
+
+// CORS options for cross-origin requests
+const corsOptions = {
+    origin: 'http://localhost:5173', // Frontend URL
+    optionsSuccessStatus: 200, // For legacy browser compatibility
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Allowed HTTP methods
+    credentials: true, // Enable credentials
+};
+
+app.use(cors(corsOptions)); // Use cors with defined options
+
+app.use(express.json());
+app.use('/api/auth', authRoute); // Auth routes
+app.use('/api/form', contactRoute); // Contact form routes
+
+app.get('/', (req, res) => {
+    res.send('Hello World');
+});
+
+app.use(errorMiddleware); // Use error middleware
+
+// Connect to the database and start the server
+connectDB()
+    .then(() => {
+        const PORT = process.env.PORT || 3000;
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    })
+    .catch((err) => {
+        console.error('Database connection failed', err);
+        process.exit(1);
+    });
+```
+
+### Step 4: Testing the Connection
+
+After making the changes, you should be able to register users through the frontend. Here's what to expect:
+
+1. **MERN Register Frontend Form**:
+    ![MERN Register Frontend Form with Console Log Success Message](./screenshots/signup_with_mern.png)
+
+2. **Registered User in MongoDB Compass**:
+    ![Registered User in MongoDB Compass](./screenshots/register_user_in_mongodb_compass.png)
+

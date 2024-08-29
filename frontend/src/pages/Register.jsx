@@ -1,4 +1,5 @@
 import { useState } from "react";
+import {useNavigate} from 'react-router-dom';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -16,10 +17,44 @@ const Register = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle form submission logic here
     console.log("Form submitted:", formData);
+
+    try{
+      const response = await fetch('http://localhost:3000/api/auth/register',
+        {
+          method:'POST',
+          headers: {
+            "Content-Type": "application/json" // Set content type to JSON
+          },
+          body: JSON.stringify(formData) // Convert JS object to JSON string
+        }
+      );
+      const data = await response.json();
+      console.log(data);
+
+      // Clearning the form after submission
+      if(response.ok){
+        setFormData({
+          username: "",
+          email: "",
+          phone: "",
+          password: "",
+        });
+
+        // Redirect to the login page
+        navigate('/login');
+    
+      }
+    }
+    catch(error){
+      console.error('Error:', error);
+    }
   };
 
   return (
@@ -39,6 +74,7 @@ const Register = () => {
               name="username"
               value={formData.username}
               onChange={handleChange}
+              autoComplete="off"
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
@@ -54,6 +90,7 @@ const Register = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
+              autoComplete="off"
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
@@ -69,6 +106,7 @@ const Register = () => {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
+              autoComplete="off"
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
@@ -84,6 +122,7 @@ const Register = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
+              autoComplete="off"
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             />

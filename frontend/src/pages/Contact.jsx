@@ -36,6 +36,7 @@ const Contact = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
+              autoComplete="off"
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
@@ -51,6 +52,7 @@ const Contact = () => {
               name="subject"
               value={formData.subject}
               onChange={handleChange}
+              autoComplete="off"
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
@@ -65,6 +67,7 @@ const Contact = () => {
               name="message"
               value={formData.message}
               onChange={handleChange}
+              autoComplete="off"
               required
               rows="4"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"

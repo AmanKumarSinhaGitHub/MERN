@@ -1,10 +1,20 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors'); // Import cors
 const app = express();
 const authRoute = require('./router/auth-router');
 const contactRoute = require('./router/contact-router');
 const connectDB = require('./utils/db');
 const errorMiddleware = require('./middlewares/error-middleware');
+
+const corsOptions = {
+    origin: 'http://localhost:5173', // Frontend URL
+    optionsSuccessStatus: 200, // For legacy browser compatibility
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Allowed HTTP methods
+    credentials: true, // Enable credentials
+};
+
+app.use(cors(corsOptions)); // Use cors
 
 // Middleware
 app.use(express.json());
