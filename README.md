@@ -1924,7 +1924,7 @@ const Register = () => {
       console.log(data);
 
       // Clearning the form after submission
-      if (response.ok) {
+      if(response.ok){
         setFormData({
           username: "",
           email: "",
@@ -1932,9 +1932,15 @@ const Register = () => {
           password: "",
         });
 
+        alert('Registration successful');
         // Redirect to the login page
-        navigate("/login");
+        navigate('/login');
+    
       }
+      else{
+        alert('Registration failed');
+      }
+      
     } catch (error) {
       console.error("Error:", error);
     }
@@ -2083,4 +2089,127 @@ In addition to storing registration data, you should now extend the functionalit
 
 By the end of this task, you should be able to store both registration and contact form data in MongoDB from the frontend.
 
+
+## Day 18 - Login Through Frontend
+
+On Day 18, we'll add login functionality to the frontend using React and connect it to the backend for user authentication.
+
+### Prerequisites
+
+- Backend should be running (`nodemon index.js`).
+- Frontend should be running (`npm run dev`).
+
+### Step 1: Ensure Login Route is Set in `main.jsx`
+
+Make sure the login route is added in `main.jsx`:
+
+```jsx
+<Route path="/login" element={<Login />} />
+```
+
+### Step 2: Implement Login Functionality in `Login.jsx`
+
+Focus on the `handleSubmit` function to send the login request to the backend. Here's the essential code:
+
+```jsx
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+const Login = () => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const navigate = useNavigate();
+
+  const handleInput = (e) => {
+    const name = e.target.name;
+    const value = e.target.value;
+
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Form submitted:", formData);
+
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+      console.log(data);
+
+      if (response.ok) {
+        setFormData({ email: "", password: "" });
+        navigate('/');
+      } else {
+        alert('Login failed, please try again.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div>
+        <label htmlFor="email">Email</label>
+        <input
+          type="email"
+          name="email"
+          id="email"
+          value={formData.email}
+          onChange={handleInput}
+          placeholder="Enter Email"
+          required
+        />
+      </div>
+
+      <div>
+        <label htmlFor="password">Password</label>
+        <input
+          type="password"
+          name="password"
+          id="password"
+          value={formData.password}
+          onChange={handleInput}
+          placeholder="Enter Password"
+          required
+        />
+      </div>
+
+      <button type="submit">Login</button>
+    </form>
+  );
+};
+
+export default Login;
+```
+
+### Step 3: Test the Login Functionality
+
+- **Successful Login**: Redirects to the homepage.
+- **Login Error**: Displays an alert to the user.
+
+### CORS Issues (Handled)
+
+If you encounter CORS issues, ensure CORS is set up in the backend (handled on Day 17).
+
+### Backend Logic (Handled)
+
+The backend logic for handling login requests is already implemented.
+
+### Conclusion
+
+You now have a functional login page that communicates with the backend to authenticate users.
 

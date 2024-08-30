@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -14,10 +15,45 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
     console.log("Form submitted:", formData);
+
+    try{
+      const response = await fetch('http://localhost:3000/api/auth/login',
+        {
+          method: 'POST',
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(formData)
+        }
+      );
+
+
+      const data = await response.json();
+      console.log(data);
+      if(response.ok){
+        setFormData({
+          email: "",
+          password: "",
+        })
+
+        alert('Login successful');
+        // Redirect to the home page
+        navigate('/');
+      }
+      else{
+        alert('Login failed');
+      }
+      
+    }
+    catch(error){
+      console.error('Error:', error);
+    }
   };
 
   return (

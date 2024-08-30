@@ -43,8 +43,12 @@ const Contact = () => {
           message: "",
         });
 
+        alert("Message sent successfully");
         // Redirect to the home page
         navigate("/");
+      }
+      else{
+        alert('Message sending failed');
       }
     } catch (error) {
       console.error("Error:", error);

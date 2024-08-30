@@ -47,9 +47,13 @@ const Register = () => {
           password: "",
         });
 
+        alert('Registration successful');
         // Redirect to the login page
         navigate('/login');
     
+      }
+      else{
+        alert('Registration failed');
       }
     }
     catch(error){
