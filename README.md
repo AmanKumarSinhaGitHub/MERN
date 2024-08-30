@@ -1887,7 +1887,7 @@ We'll update the `handleSubmit` function in `Register.jsx` to send the registrat
 
 ```jsx
 import { useState } from "react";
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -1905,7 +1905,6 @@ const Register = () => {
     });
   };
 
-
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -1913,21 +1912,19 @@ const Register = () => {
     // Handle form submission logic here
     console.log("Form submitted:", formData);
 
-    try{
-      const response = await fetch('http://localhost:3000/api/auth/register',
-        {
-          method:'POST',
-          headers: {
-            "Content-Type": "application/json" // Set content type to JSON
-          },
-          body: JSON.stringify(formData) // Convert JS object to JSON string
-        }
-      );
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", // Set content type to JSON
+        },
+        body: JSON.stringify(formData), // Convert JS object to JSON string
+      });
       const data = await response.json();
       console.log(data);
 
       // Clearning the form after submission
-      if(response.ok){
+      if (response.ok) {
         setFormData({
           username: "",
           email: "",
@@ -1936,27 +1933,75 @@ const Register = () => {
         });
 
         // Redirect to the login page
-        navigate('/login');
-    
+        navigate("/login");
       }
-    }
-    catch(error){
-      console.error('Error:', error);
+    } catch (error) {
+      console.error("Error:", error);
     }
   };
 
   return (
-    
     <form onSubmit={handleSubmit}>
-      {/* Form Input Fields here */}
+      <div>
+        <label htmlFor="username">Username</label>
+        <input
+          type="text"
+          name="username" // Field identifier
+          id="username"
+          value={formData.username} // State value
+          onChange={handleInput} // Update value
+          placeholder="Enter Username"
+          required
+        />
+      </div>
 
+      <div>
+        <label htmlFor="email">Email</label>
+        <input
+          type="email"
+          name="email"
+          id="email"
+          value={formData.email}
+          onChange={handleInput}
+          placeholder="Enter Email"
+          required
+        />
+      </div>
+
+      <div>
+        <label htmlFor="phone">Phone</label>
+        <input
+          type="text"
+          name="phone"
+          id="phone"
+          value={formData.phone}
+          onChange={handleInput}
+          placeholder="Enter Phone"
+          required
+        />
+      </div>
+
+      <div>
+        <label htmlFor="password">Password</label>
+        <input
+          type="password"
+          name="password"
+          id="password"
+          value={formData.password}
+          onChange={handleInput}
+          placeholder="Enter Password"
+          required
+        />
+      </div>
+
+      <div>
+        <button type="submit">Register</button>
+      </div>
     </form>
-      
   );
 };
 
 export default Register;
-
 ```
 
 ### Step 2: Handle CORS Errors
@@ -1991,7 +2036,7 @@ const errorMiddleware = require('./middlewares/error-middleware');
 // CORS options for cross-origin requests
 const corsOptions = {
     origin: 'http://localhost:5173', // Frontend URL
-    optionsSuccessStatus: 200, // For legacy browser compatibility
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Allowed HTTP methods
     credentials: true, // Enable credentials
 };
@@ -2031,4 +2076,11 @@ After making the changes, you should be able to register users through the front
 
 2. **Registered User in MongoDB Compass**:
     ![Registered User in MongoDB Compass](./screenshots/register_user_in_mongodb_compass.png)
+
+### Task: Now Store Contact Form Data in MongoDB
+
+In addition to storing registration data, you should now extend the functionality to store contact form data in MongoDB. Follow similar steps as you did for the registration form.
+
+By the end of this task, you should be able to store both registration and contact form data in MongoDB from the frontend.
+
 

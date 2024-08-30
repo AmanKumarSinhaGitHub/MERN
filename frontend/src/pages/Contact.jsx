@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -15,19 +16,53 @@ const Contact = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle form submission logic here
     console.log("Form submitted:", formData);
+
+    try {
+      const response = await fetch("http://localhost:3000/api/form/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      console.log(data);
+
+      // Clearning the form after submission
+      if (response.ok) {
+        setFormData({
+          email: "",
+          subject: "",
+          message: "",
+        });
+
+        // Redirect to the home page
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-lg bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">Contact Us</h1>
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="w-full max-w-lg rounded-lg bg-white p-8 shadow-md">
+        <h1 className="mb-6 text-center text-2xl font-bold text-gray-800">
+          Contact Us
+        </h1>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700 font-medium mb-2">
+            <label
+              htmlFor="email"
+              className="mb-2 block font-medium text-gray-700"
+            >
               Email
             </label>
             <input
@@ -38,12 +73,15 @@ const Contact = () => {
               onChange={handleChange}
               autoComplete="off"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
 
           <div className="mb-4">
-            <label htmlFor="subject" className="block text-gray-700 font-medium mb-2">
+            <label
+              htmlFor="subject"
+              className="mb-2 block font-medium text-gray-700"
+            >
               Subject
             </label>
             <input
@@ -54,12 +92,15 @@ const Contact = () => {
               onChange={handleChange}
               autoComplete="off"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
 
           <div className="mb-6">
-            <label htmlFor="message" className="block text-gray-700 font-medium mb-2">
+            <label
+              htmlFor="message"
+              className="mb-2 block font-medium text-gray-700"
+            >
               Message
             </label>
             <textarea
@@ -70,13 +111,13 @@ const Contact = () => {
               autoComplete="off"
               required
               rows="4"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200"
+            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white transition duration-200 hover:bg-blue-700"
           >
             Send Message
           </button>
