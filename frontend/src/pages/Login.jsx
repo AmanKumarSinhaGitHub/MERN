@@ -18,12 +18,14 @@ const Login = () => {
 
   const navigate = useNavigate();
 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; // Getting the backend URL(localhost:3000) from the .env file 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
 
     try{
-      const response = await fetch('http://localhost:3000/api/auth/login',
+      const response = await fetch(`${BACKEND_URL}/api/auth/login`,
         {
           method: 'POST',
           headers: {

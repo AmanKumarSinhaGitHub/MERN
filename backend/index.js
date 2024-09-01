@@ -8,7 +8,7 @@ const connectDB = require('./utils/db');
 const errorMiddleware = require('./middlewares/error-middleware');
 
 const corsOptions = {
-    origin: 'http://localhost:5173', // Frontend URL
+    origin: process.env.VITE_FRONTEND_URL, // Frontend URL from .env
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Allowed HTTP methods
     credentials: true, // Enable credentials

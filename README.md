@@ -1866,9 +1866,9 @@ Now, if you try to access a route in your application that doesn't exist (e.g., 
 This setup ensures a smooth user experience by guiding users back to a valid part of your application if they land on an incorrect URL.
 
 
-## Day 17 - Connect Frontend with Backend and Storing Registration Data
+## Day 17 - Connect Frontend with Backend and Store Registration Data
 
-On Day 17, we'll be connecting our frontend (React) to the backend (Express.js) to store user registration data in MongoDB. We'll cover how to set up the connection, handle CORS errors, and successfully send data from the frontend to the backend.
+On Day 17, we’ll connect our frontend (React) to the backend (Express.js) to store user registration data in MongoDB. We’ll cover setting up the connection, handling CORS errors, and successfully sending data from the frontend to the backend.
 
 ### Prerequisites
 
@@ -1879,11 +1879,28 @@ Ensure you have two terminals open in VS Code:
 
 ### Overview
 
-In the previous steps, we tested our backend using Postman to store data in MongoDB. Now, we'll connect the frontend to the backend to handle the same functionality using a registration form in React.
+In the previous steps, we tested our backend using Postman to store data in MongoDB. Now, we’ll connect the frontend to the backend to handle the same functionality using a registration form in React.
+
+### Step 0: Set Up Environment Variables
+
+1. **Frontend `.env` File**: In the frontend folder, create a `.env` file to store the backend URL.
+
+   ```bash
+   VITE_BACKEND_URL=http://localhost:3000
+   ```
+
+2. **Backend `.env` File**: In the backend folder, update the `.env` file to include the frontend URL and other environment variables.
+
+   ```bash
+   PORT=3000
+   MONGO_URI=mongodb+srv://<username>:<password>@cluster1.o4g0r.mongodb.net
+   JWT_SECRET=amansecretkey
+   VITE_FRONTEND_URL=http://localhost:5173
+   ```
 
 ### Step 1: Modify `Register.jsx`
 
-We'll update the `handleSubmit` function in `Register.jsx` to send the registration data to our backend.
+We’ll update the `handleSubmit` function in `Register.jsx` to send the registration data to our backend.
 
 ```jsx
 import { useState } from "react";
@@ -1907,24 +1924,25 @@ const Register = () => {
 
   const navigate = useNavigate();
 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; // Getting the backend URL from the .env file 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
     console.log("Form submitted:", formData);
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/register", {
+      const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json", // Set content type to JSON
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData), // Convert JS object to JSON string
       });
       const data = await response.json();
       console.log(data);
 
-      // Clearning the form after submission
-      if(response.ok){
+      // Clearing the form after submission
+      if (response.ok) {
         setFormData({
           username: "",
           email: "",
@@ -1933,14 +1951,10 @@ const Register = () => {
         });
 
         alert('Registration successful');
-        // Redirect to the login page
         navigate('/login');
-    
-      }
-      else{
+      } else {
         alert('Registration failed');
       }
-      
     } catch (error) {
       console.error("Error:", error);
     }
@@ -1952,10 +1966,10 @@ const Register = () => {
         <label htmlFor="username">Username</label>
         <input
           type="text"
-          name="username" // Field identifier
+          name="username"
           id="username"
-          value={formData.username} // State value
-          onChange={handleInput} // Update value
+          value={formData.username}
+          onChange={handleChange}
           placeholder="Enter Username"
           required
         />
@@ -1968,7 +1982,7 @@ const Register = () => {
           name="email"
           id="email"
           value={formData.email}
-          onChange={handleInput}
+          onChange={handleChange}
           placeholder="Enter Email"
           required
         />
@@ -1981,7 +1995,7 @@ const Register = () => {
           name="phone"
           id="phone"
           value={formData.phone}
-          onChange={handleInput}
+          onChange={handleChange}
           placeholder="Enter Phone"
           required
         />
@@ -1994,7 +2008,7 @@ const Register = () => {
           name="password"
           id="password"
           value={formData.password}
-          onChange={handleInput}
+          onChange={handleChange}
           placeholder="Enter Password"
           required
         />
@@ -2018,74 +2032,117 @@ When connecting the frontend with the backend, you might encounter a **CORS Poli
 
 CORS (Cross-Origin Resource Sharing) is a security feature that allows or restricts web pages from making requests to a different domain. In a MERN stack application, this issue arises when the frontend and backend are hosted on different domains.
 
-#### Step 3: Install and Configure CORS
+### Step 3: Install and Configure CORS
 
 To resolve the CORS issue, install the CORS package in the backend.
 
 1. **Install CORS**: Ensure you're in the backend directory and run the following command:
+
    ```bash
    npm i cors
    ```
 
 2. **Configure CORS in `index.js`**: Add the following code to your `index.js` file:
 
-```js
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors'); // Import cors
-const app = express();
-const authRoute = require('./router/auth-router');
-const contactRoute = require('./router/contact-router');
-const connectDB = require('./utils/db');
-const errorMiddleware = require('./middlewares/error-middleware');
+   ```js
+   require('dotenv').config();
+   const express = require('express');
+   const cors = require('cors'); // Import cors
+   const app = express();
+   const authRoute = require('./router/auth-router');
+   const contactRoute = require('./router/contact-router');
+   const connectDB = require('./utils/db');
+   const errorMiddleware = require('./middlewares/error-middleware');
 
-// CORS options for cross-origin requests
-const corsOptions = {
-    origin: 'http://localhost:5173', // Frontend URL
-    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Allowed HTTP methods
-    credentials: true, // Enable credentials
-};
+   // CORS options for cross-origin requests
+   const corsOptions = {
+       origin: process.env.VITE_FRONTEND_URL, // Frontend URL from .env
+       optionsSuccessStatus: 200, 
+       methods: "GET,HEAD,PUT,PATCH,POST,DELETE", 
+       credentials: true, 
+   };
 
-app.use(cors(corsOptions)); // Use cors with defined options
+   app.use(cors(corsOptions)); // Use cors with defined options
 
-app.use(express.json());
-app.use('/api/auth', authRoute); // Auth routes
-app.use('/api/form', contactRoute); // Contact form routes
+   app.use(express.json());
+   app.use('/api/auth', authRoute); // Auth routes
+   app.use('/api/form', contactRoute); // Contact form routes
 
-app.get('/', (req, res) => {
-    res.send('Hello World');
-});
+   app.get('/', (req, res) => {
+       res.send('Hello World');
+   });
 
-app.use(errorMiddleware); // Use error middleware
+   app.use(errorMiddleware); // Use error middleware
 
-// Connect to the database and start the server
-connectDB()
-    .then(() => {
-        const PORT = process.env.PORT || 3000;
-        app.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
-        });
-    })
-    .catch((err) => {
-        console.error('Database connection failed', err);
-        process.exit(1);
-    });
-```
+   // Connect to the database and start the server
+   connectDB()
+       .then(() => {
+           const PORT = process.env.PORT || 3000;
+           app.listen(PORT, () => {
+               console.log(`Server is running on port ${PORT}`);
+           });
+       })
+       .catch((err) => {
+           console.error('Database connection failed', err);
+           process.exit(1);
+       });
+   ```
 
 ### Step 4: Testing the Connection
 
 After making the changes, you should be able to register users through the frontend. Here's what to expect:
 
 1. **MERN Register Frontend Form**:
-    ![MERN Register Frontend Form with Console Log Success Message](./screenshots/signup_with_mern.png)
+   ![MERN Register Frontend Form with Console Log Success Message](./screenshots/signup_with_mern.png)
 
 2. **Registered User in MongoDB Compass**:
-    ![Registered User in MongoDB Compass](./screenshots/register_user_in_mongodb_compass.png)
+   ![Registered User in MongoDB Compass](./screenshots/register_user_in_mongodb_compass.png)
 
-### Task: Now Store Contact Form Data in MongoDB
+### Step 5: Add a Start Script to `package.json`
 
-In addition to storing registration data, you should now extend the functionality to store contact form data in MongoDB. Follow similar steps as you did for the registration form.
+To streamline the process of starting your backend server, add a `start` script to the `package.json` file inside the backend folder.
+
+#### Modify `package.json`
+
+Open your `package.json` file in the backend folder and add the following `start` script under `"scripts"`:
+
+```json
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "server",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js" // Add this line
+  },
+  "author": "aman",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.8.0",
+    "mongoose": "^8.5.2",
+    "zod": "^3.23.8"
+  }
+}
+```
+
+### Step 6: Run Your Backend
+
+Now, you can start your backend server by running the following command:
+
+```bash
+npm start
+```
+
+This command will work in both development and production environments.
+
+### Task: Store Contact Form Data in MongoDB
+
+In addition to storing registration data, extend the functionality to store contact form data in MongoDB. Follow similar steps as you did for the registration form.
 
 By the end of this task, you should be able to store both registration and contact form data in MongoDB from the frontend.
 
@@ -2133,12 +2190,14 @@ const Login = () => {
     });
   };
 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; // Getting the backend URL(localhost:3000) from the .env file 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json"

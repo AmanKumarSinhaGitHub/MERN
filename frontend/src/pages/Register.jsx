@@ -20,13 +20,15 @@ const Register = () => {
 
   const navigate = useNavigate();
 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; // Getting the backend URL(localhost:3000) from the .env file 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle form submission logic here
     console.log("Form submitted:", formData);
 
     try{
-      const response = await fetch('http://localhost:3000/api/auth/register',
+      const response = await fetch(`${BACKEND_URL}/api/auth/register`,
         {
           method:'POST',
           headers: {
