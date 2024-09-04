@@ -2272,3 +2272,4 @@ The backend logic for handling login requests is already implemented.
 
 You now have a functional login page that communicates with the backend to authenticate users.
 
+## Day 19 - Store JWT Token in Local Storage using Context API for Authentication
