@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../store/auth";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -15,46 +16,44 @@ const Login = () => {
     });
   };
 
-
   const navigate = useNavigate();
+  const { storeTokenInLocalStorage } = useAuth();
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; // Getting the backend URL(localhost:3000) from the .env file 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; // Getting the backend URL(localhost:3000) from the .env file
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
 
-    try{
-      const response = await fetch(`${BACKEND_URL}/api/auth/login`,
-        {
-          method: 'POST',
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(formData)
-        }
-      );
-
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
       const data = await response.json();
       console.log(data);
-      if(response.ok){
+
+      if (response.ok) {
+        // Save the token in local storage
+        storeTokenInLocalStorage(data.token);
+
         setFormData({
           email: "",
           password: "",
-        })
+        });
 
-        alert('Login successful');
+        alert("Login successful");
         // Redirect to the home page
-        navigate('/');
+        navigate("/");
+      } else {
+        alert("Login failed");
       }
-      else{
-        alert('Login failed');
-      }
-      
-    }
-    catch(error){
-      console.error('Error:', error);
+    } catch (error) {
+      console.error("Error:", error);
     }
   };
 

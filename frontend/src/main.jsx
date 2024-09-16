@@ -16,6 +16,7 @@ import Contact from "./pages/Contact.jsx";
 import Register from "./pages/Register.jsx";
 import Login from "./pages/Login.jsx";
 import Error from "./pages/Error.jsx";
+import { AuthProvider } from "./store/auth.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -23,15 +24,17 @@ const router = createBrowserRouter(
       <Route path="" element={<Home />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
-      <Route path="/register" element={<Register />} /> 
-      <Route path="/login" element={<Login />} /> 
-      <Route path="*" element={<Error/>} />
-    </Route>
-  )
+      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="*" element={<Error />} />
+    </Route>,
+  ),
 );
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <RouterProvider router={router} />
-  </StrictMode>
+  <AuthProvider>
+    <StrictMode>
+      <RouterProvider router={router} />
+    </StrictMode>
+  </AuthProvider>,
 );

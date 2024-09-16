@@ -1,5 +1,6 @@
 import { useState } from "react";
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../store/auth";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -17,31 +18,32 @@ const Register = () => {
     });
   };
 
-
   const navigate = useNavigate();
+  const { storeTokenInLocalStorage } = useAuth();
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; // Getting the backend URL(localhost:3000) from the .env file 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; // Getting the backend URL(localhost:3000) from the .env file
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle form submission logic here
     console.log("Form submitted:", formData);
 
-    try{
-      const response = await fetch(`${BACKEND_URL}/api/auth/register`,
-        {
-          method:'POST',
-          headers: {
-            "Content-Type": "application/json" // Set content type to JSON
-          },
-          body: JSON.stringify(formData) // Convert JS object to JSON string
-        }
-      );
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", // Set content type to JSON
+        },
+        body: JSON.stringify(formData), // Convert JS object to JSON string
+      });
       const data = await response.json();
       console.log(data);
 
       // Clearning the form after submission
-      if(response.ok){
+      if (response.ok) {
+        // Save the token in local storage
+        storeTokenInLocalStorage(data.token);
+
         setFormData({
           username: "",
           email: "",
@@ -49,29 +51,29 @@ const Register = () => {
           password: "",
         });
 
-        alert('Registration successful');
+        alert("Registration successful");
         // Redirect to the login page
-        navigate('/login');
-    
+        navigate("/login");
+      } else {
+        alert("Registration failed");
       }
-      else{
-        alert('Registration failed');
-      }
-    }
-    catch(error){
-      console.error('Error:', error);
+    } catch (error) {
+      console.error("Error:", error);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
+        <h2 className="mb-6 text-center text-2xl font-bold text-gray-800">
           Register
         </h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="username" className="block text-gray-700 font-medium mb-2">
+            <label
+              htmlFor="username"
+              className="mb-2 block font-medium text-gray-700"
+            >
               Username
             </label>
             <input
@@ -82,12 +84,15 @@ const Register = () => {
               onChange={handleChange}
               autoComplete="off"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
 
           <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700 font-medium mb-2">
+            <label
+              htmlFor="email"
+              className="mb-2 block font-medium text-gray-700"
+            >
               Email
             </label>
             <input
@@ -98,12 +103,15 @@ const Register = () => {
               onChange={handleChange}
               autoComplete="off"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
 
           <div className="mb-4">
-            <label htmlFor="phone" className="block text-gray-700 font-medium mb-2">
+            <label
+              htmlFor="phone"
+              className="mb-2 block font-medium text-gray-700"
+            >
               Phone
             </label>
             <input
@@ -114,12 +122,15 @@ const Register = () => {
               onChange={handleChange}
               autoComplete="off"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
 
           <div className="mb-6">
-            <label htmlFor="password" className="block text-gray-700 font-medium mb-2">
+            <label
+              htmlFor="password"
+              className="mb-2 block font-medium text-gray-700"
+            >
               Password
             </label>
             <input
@@ -130,13 +141,13 @@ const Register = () => {
               onChange={handleChange}
               autoComplete="off"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200"
+            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white transition duration-200 hover:bg-blue-700"
           >
             Register
           </button>

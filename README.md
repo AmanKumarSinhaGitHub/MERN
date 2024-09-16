@@ -2272,4 +2272,125 @@ The backend logic for handling login requests is already implemented.
 
 You now have a functional login page that communicates with the backend to authenticate users.
 
-## Day 19 - Store JWT Token in Local Storage using Context API for Authentication
+## Day 19 - Storing JWT Token in Local Storage Using Context API
+
+On Day 19, we'll focus on securely saving a JWT (JSON Web Token) in the browser's local storage to keep users logged in. We'll use React's **Context API** to make it easier to manage authentication across the app.
+
+### What You’ll Do Today:
+1. Create an **authentication context** to store the token.
+2. Wrap your app with the context so it can be used anywhere.
+3. Update the **Login** and **Register** pages to store the token after successful login or registration.
+
+
+#### Step 1: Create Authentication Context (`auth.jsx`)
+
+First, we'll create a new **context** to store and access the JWT token.
+
+1. Create a folder called `Store` inside the `src` directory.
+2. Inside the `Store` folder, create a file named `auth.jsx`.
+3. Add the following code:
+
+```jsx
+import React, { createContext, useContext } from 'react';
+
+// Step 1: Create a context
+export const AuthContext = createContext();
+
+// Step 2: Create a provider to share the token
+export const AuthProvider = ({ children }) => {
+  const storeTokenInLocalStorage = (serverToken) => {
+    localStorage.setItem("token", serverToken); // Save the token in local storage
+  };
+
+  return (
+    <AuthContext.Provider value={{ storeTokenInLocalStorage }}>
+      {children} {/* All components inside will have access to this */}
+    </AuthContext.Provider>
+  );
+};
+
+// Step 3: Create a custom hook to use the context easily
+export const useAuth = () => {
+  return useContext(AuthContext);
+};
+```
+
+**Explanation:**
+- **Context** allows us to share data (like a token) between components without passing it manually every time.
+- The `AuthProvider` provides the function `storeTokenInLocalStorage` to save the token in local storage.
+- The `useAuth` hook makes it easier to use this function in other parts of the app.
+
+#### Step 2: Wrap Your App with `AuthProvider`
+
+Next, we need to make this authentication context available to the entire app.
+
+1. Open `main.jsx`.
+2. Wrap your app in the `AuthProvider` component, like this:
+
+```jsx
+import { AuthProvider } from './store/auth';
+
+createRoot(document.getElementById("root")).render(
+  <AuthProvider> {/* Wrap the app to give access to the auth context */}
+    <StrictMode>
+      <RouterProvider router={router} />
+    </StrictMode>
+  </AuthProvider>
+);
+```
+
+#### Step 3: Update `Login.jsx` and `Register.jsx` to Save the Token
+
+Now, we’ll update the **Login** and **Register** pages so they can store the token after a successful login or registration.
+
+1. Open `Login.jsx` (and similarly for `Register.jsx`).
+2. Modify the file to save the token when the login/registration is successful:
+
+```jsx
+import { useAuth } from "../store/auth"; // Import the custom hook to access auth context
+
+const { storeTokenInLocalStorage } = useAuth(); // Get the function to store token
+
+const data = await response.json(); // Get the response data (which includes the token)
+
+if (response.ok) {
+  storeTokenInLocalStorage(data.token); // Save the token in local storage
+
+  setFormData({
+    email: "",
+    password: "",
+  });
+
+  alert('Login successful');
+  navigate('/'); // Redirect to the homepage
+} else {
+  alert('Login failed, please try again.');
+}
+```
+
+**What’s Happening Here:**
+- After a successful login or registration, the JWT token is returned by the server.
+- We use `storeTokenInLocalStorage(data.token)` to save the token in local storage.
+- This ensures the user stays logged in, even after refreshing the page.
+
+
+#### Step 4: Check the Token in Local Storage
+
+You can verify that the JWT token is being stored in the browser by:
+1. Opening your app.
+2. Logging in or registering.
+3. Inspecting the browser's local storage (Right-click -> Inspect -> Application tab -> Local Storage).
+
+Here’s how it should look:
+
+![local_storage_token](./screenshots/localStorage_token.png)
+
+
+#### Summary
+
+After completing Day 19:
+- You now have a system to save JWT tokens in the browser.
+- The token is stored securely in local storage using the **Context API**.
+- Your app can now keep users logged in across different pages and sessions.
+
+This process is essential for authentication in modern web apps and will help keep your users logged in securely!
