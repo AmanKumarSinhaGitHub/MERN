@@ -2394,3 +2394,185 @@ After completing Day 19:
 - Your app can now keep users logged in across different pages and sessions.
 
 This process is essential for authentication in modern web apps and will help keep your users logged in securely!
+
+## Day 20 - Logout Functionality
+
+Today, we’ll learn how to log users out of the application by removing the JWT token from local storage. This ensures that when users log out, they are no longer authenticated.
+
+### What You’ll Do Today:
+1. Create a **Logout** route in `main.jsx`.
+2. Build a **Logout.jsx** component to handle logging out.
+3. Update the **AuthContext** to include the logout functionality.
+4. Modify the **Header.jsx** to display the **Logout** link when the user is logged in.
+
+
+### Step 1: Add Logout Route in `main.jsx`
+
+To start, we need to create a route for logging out.
+
+1. Open `main.jsx`.
+2. Add a new route for the **Logout** page:
+
+```jsx
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path="/" element={<App />}>
+      <Route path="" element={<Home />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/logout" element={<Logout />} /> {/* Logout route */}
+      <Route path="*" element={<Error />} />
+    </Route>
+  ),
+);
+```
+
+This creates a route that points to the **Logout** component.
+
+
+### Step 2: Create the `Logout.jsx` Component
+
+Next, we’ll create the component that handles logging the user out by clearing the token from local storage.
+
+1. Inside your `pages` folder, create a file called `Logout.jsx`.
+2. Add the following code:
+
+```jsx
+import { useEffect } from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../store/auth";
+
+const Logout = () => {
+  const { LogoutUser } = useAuth(); // Get the logout function from context
+
+  useEffect(() => {
+    LogoutUser(); // Call logout function when the component loads
+  }, [LogoutUser]);
+
+  return <Navigate to="/login" />; // Redirect the user to the login page
+};
+
+export default Logout;
+```
+
+**Explanation:**
+- The `LogoutUser` function is called as soon as the component loads, removing the JWT token.
+- After logging out, the user is immediately redirected to the **Login** page.
+
+
+### Step 3: Update the Authentication Context (`auth.jsx`)
+
+We need to modify the authentication context to support the logout functionality.
+
+1. Open `auth.jsx` (inside your `store` folder).
+2. Add the following updates:
+
+```jsx
+import { createContext, useContext, useState } from 'react'; 
+
+export const AuthContext = createContext();
+
+export const AuthProvider = ({ children }) => {
+  
+  const [token, setToken] = useState(localStorage.getItem("token")); // Get token from local storage
+
+  let isLoggedIn = !!token; // Check if the user is logged in
+
+  // Function to store the token
+  const storeTokenInLocalStorage = (serverToken) => {
+    setToken(serverToken);
+    localStorage.setItem("token", serverToken); // Save token to local storage
+  };
+
+  // Logout function to clear the token
+  const LogoutUser = () => {
+    setToken(""); // Clear the token in state
+    localStorage.removeItem("token"); // Remove the token from local storage
+  };
+
+  return (
+    <AuthContext.Provider value={{ storeTokenInLocalStorage, LogoutUser, isLoggedIn }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+// Custom hook to use the AuthContext
+export const useAuth = () => {
+  return useContext(AuthContext); 
+};
+```
+
+**What Changed:**
+- We added a `LogoutUser` function that clears the token from both state and local storage.
+- `isLoggedIn` now dynamically checks if a token is present.
+
+### Step 4: Update the `Header.jsx` to Show the Logout Button
+
+We need to make sure the **Logout** link is only shown when the user is logged in.
+
+1. Open `Header.jsx`.
+2. Modify the component like this:
+
+```jsx
+import { useAuth } from "../store/auth"; // Import the AuthContext
+
+const Header = () => {
+  const { isLoggedIn } = useAuth(); // Check if the user is logged in
+
+  return (
+    <header>
+      <nav>
+        <ul>
+          {isLoggedIn ? ( // Show Logout link if user is logged in
+            <li>
+              <NavLink
+                to="/logout"
+                className={({ isActive }) =>
+                  `py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
+                }
+              >
+                Logout
+              </NavLink>
+            </li>
+          ) : (
+            <>
+              <li>
+                <NavLink
+                  to="/register"
+                  className={({ isActive }) =>
+                    `py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
+                  }
+                >
+                  Register
+                </NavLink>
+              </li>
+
+              <li>
+                <NavLink
+                  to="/login"
+                  className={({ isActive }) =>
+                    `py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
+                  }
+                >
+                  Login
+                </NavLink>
+              </li>
+            </>
+          )}
+        </ul>
+      </nav>
+    </header>
+  );
+};
+
+export default Header;
+```
+
+**Explanation:**
+- If the user is logged in (`isLoggedIn` is `true`), show the **Logout** link.
+- If the user is not logged in, show the **Login** and **Register** links.
+
+Now, users can securely log out of your app!

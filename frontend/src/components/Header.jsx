@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { useAuth } from "../store/auth";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+
+  const { isLoggedIn } = useAuth();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -14,7 +17,7 @@ const Header = () => {
         <div className="flex h-16 items-center justify-between">
           <div className="flex-shrink-0">
             <h1 className="text-2xl font-bold text-white">
-              <Link to="/">Aman</Link> 
+              <Link to="/">Aman</Link>
             </h1>
           </div>
           <div className="hidden md:block">
@@ -50,28 +53,42 @@ const Header = () => {
                 </NavLink>
               </li>
 
-              <li>
-                <NavLink
-                  to="/register"
-                  className={({ isActive }) =>
-                    `py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
-                  }
-                >
-                  Register
-                </NavLink>
-              </li>
+              {isLoggedIn ? (
+                <li>
+                  <NavLink
+                    to="/logout"
+                    className={({ isActive }) =>
+                      `py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
+                    }
+                  >
+                    Logout
+                  </NavLink>
+                </li>
+              ) : (
+                <>
+                  <li>
+                    <NavLink
+                      to="/register"
+                      className={({ isActive }) =>
+                        `py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
+                      }
+                    >
+                      Register
+                    </NavLink>
+                  </li>
 
-
-              <li>
-                <NavLink
-                  to="/login"
-                  className={({ isActive }) =>
-                    `py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
-                  }
-                >
-                  Login
-                </NavLink>
-              </li>
+                  <li>
+                    <NavLink
+                      to="/login"
+                      className={({ isActive }) =>
+                        `py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
+                      }
+                    >
+                      Login
+                    </NavLink>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
           <div className="md:hidden">
@@ -137,28 +154,42 @@ const Header = () => {
               </NavLink>
             </li>
 
-            <li>
-              <NavLink
-                to="/register"
-                className={({ isActive }) =>
-                  `block py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
-                }
-              >
-                Register
-              </NavLink>
-            </li>
+            {isLoggedIn ? (
+              <li>
+                <NavLink
+                  to="/logout"
+                  className={({ isActive }) =>
+                    `py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
+                  }
+                >
+                  Logout
+                </NavLink>
+              </li>
+            ) : (
+              <>
+                <li>
+                  <NavLink
+                    to="/register"
+                    className={({ isActive }) =>
+                      `py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
+                    }
+                  >
+                    Register
+                  </NavLink>
+                </li>
 
-
-            <li>
-              <NavLink
-                to="/login"
-                className={({ isActive }) =>
-                  `block py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
-                }
-              >
-                Login
-              </NavLink>
-            </li>
+                <li>
+                  <NavLink
+                    to="/login"
+                    className={({ isActive }) =>
+                      `py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
+                    }
+                  >
+                    Login
+                  </NavLink>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       )}

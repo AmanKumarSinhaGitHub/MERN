@@ -17,6 +17,7 @@ import Register from "./pages/Register.jsx";
 import Login from "./pages/Login.jsx";
 import Error from "./pages/Error.jsx";
 import { AuthProvider } from "./store/auth.jsx";
+import Logout from "./pages/Logout.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -26,6 +27,7 @@ const router = createBrowserRouter(
       <Route path="/contact" element={<Contact />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/logout" element={<Logout />} />
       <Route path="*" element={<Error />} />
     </Route>,
   ),
