@@ -5,8 +5,8 @@ import { useAuth } from "../store/auth";
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { isLoggedIn } = useAuth();
-
+  const { isLoggedIn, loggedInUser } = useAuth();
+  
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
@@ -17,7 +17,7 @@ const Header = () => {
         <div className="flex h-16 items-center justify-between">
           <div className="flex-shrink-0">
             <h1 className="text-2xl font-bold text-white">
-              <Link to="/">Aman</Link>
+              <Link to="/">MERN</Link>
             </h1>
           </div>
           <div className="hidden md:block">
@@ -61,7 +61,10 @@ const Header = () => {
                       `py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
                     }
                   >
-                    Logout
+                    Logout {" - "}
+                    {loggedInUser?.user?.username
+                      ? loggedInUser.user.username
+                      : ""}
                   </NavLink>
                 </li>
               ) : (
@@ -162,7 +165,10 @@ const Header = () => {
                     `py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
                   }
                 >
-                  Logout
+                  Logout {" - "}
+                  {loggedInUser?.user?.username
+                    ? loggedInUser.user.username
+                    : ""}{" "}
                 </NavLink>
               </li>
             ) : (

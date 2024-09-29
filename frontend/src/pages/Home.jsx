@@ -1,10 +1,15 @@
+import { useAuth } from "../store/auth";
+
 const Home = () => {
+  const { loggedInUser } = useAuth();
   return (
     <div className="bg-gray-100">
       {/* Hero Section */}
       <section className="bg-blue-600 text-white py-16">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-5xl font-bold mb-4">Welcome to Our Website</h1>
+          <h1 className="text-5xl font-bold mb-4">
+            Welcome to Our Website {loggedInUser?.user?.username && `${loggedInUser.user.username}!`}
+          </h1>
           <p className="text-xl mb-6">
             We provide innovative solutions and exceptional services tailored to your needs.
           </p>

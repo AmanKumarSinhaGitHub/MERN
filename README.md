@@ -792,7 +792,6 @@ After these changes, you can register a user via Postman. The response should in
 
 By using JSON Web Tokens (JWT), you've added an extra layer of security to your user authentication process. JWTs are an effective and scalable solution for managing user sessions in modern web applications.
 
-
 ## Day 9 - User Login Route
 
 To implement user login functionality, add the following route in `auth-router.js`:
@@ -820,9 +819,14 @@ const login = async (req, res) => {
     }
 
     // Compare the password
-    const isPasswordValid = await bcrypt.compare(String(password), user.password);
+    const isPasswordValid = await bcrypt.compare(
+      String(password),
+      user.password
+    );
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Username or Password is Incorrect" });
+      return res
+        .status(401)
+        .json({ message: "Username or Password is Incorrect" });
     }
 
     // Successful login, return JWT
@@ -841,8 +845,8 @@ module.exports = { home, register, login };
 ```
 
 ### Screenshot of the Login Route in Postman
-- ![Login](./screenshots/login_route.png)
 
+- ![Login](./screenshots/login_route.png)
 
 ## Day 10 - Validation using Zod
 
@@ -873,33 +877,33 @@ npm i zod
 Create a folder named `validator` in the backend directory. Inside this folder, create a file named `auth-validator.js` with the following content:
 
 ```js
-const { z } = require('zod');
+const { z } = require("zod");
 
 const SignUpSchema = z.object({
-    username: z
-        .string({ required_error: "Username is required" })
-        .trim()
-        .min(3, { message: "Username must be at least 3 characters long" })
-        .max(255, { message: "Username must be at most 255 characters long" }),
+  username: z
+    .string({ required_error: "Username is required" })
+    .trim()
+    .min(3, { message: "Username must be at least 3 characters long" })
+    .max(255, { message: "Username must be at most 255 characters long" }),
 
-    email: z
-        .string({ required_error: "Email is required" })
-        .trim()
-        .min(3, { message: "Email must be at least 3 characters long" })
-        .max(255, { message: "Email must be at most 255 characters long" })
-        .email({ message: "Invalid email address", tldWhitelist: ["com", "net"] }),
+  email: z
+    .string({ required_error: "Email is required" })
+    .trim()
+    .min(3, { message: "Email must be at least 3 characters long" })
+    .max(255, { message: "Email must be at most 255 characters long" })
+    .email({ message: "Invalid email address", tldWhitelist: ["com", "net"] }),
 
-    phone: z
-        .string({ required_error: "Phone is required" })
-        .trim()
-        .min(10, { message: "Phone must be at least 10 characters long" })
-        .max(15, { message: "Phone must be at most 15 characters long" })
-        .regex(/^\d+$/, { message: "Phone must contain only digits" }),
+  phone: z
+    .string({ required_error: "Phone is required" })
+    .trim()
+    .min(10, { message: "Phone must be at least 10 characters long" })
+    .max(15, { message: "Phone must be at most 15 characters long" })
+    .regex(/^\d+$/, { message: "Phone must contain only digits" }),
 
-    password: z
-        .string({ required_error: "Password is required" })
-        .min(6, { message: "Password must be at least 6 characters long" })
-        .max(255, { message: "Password must be at most 255 characters long" }),
+  password: z
+    .string({ required_error: "Password is required" })
+    .min(6, { message: "Password must be at least 6 characters long" })
+    .max(255, { message: "Password must be at most 255 characters long" }),
 });
 
 module.exports = { SignUpSchema };
@@ -911,16 +915,16 @@ Create a folder named `middlewares` and add a file named `validate-middleware.js
 
 ```js
 const validate = (Schema) => async (req, res, next) => {
-    try {
-        const parsedBody = Schema.parse(req.body); // Validate the request body
-        req.body = parsedBody; // Overwrite the request body with the parsed data
-        next(); // Move to the next middleware or route handler
-    } catch (error) {
-        res.status(400).json({
-            message: "Validation Failed",
-            errors: error.errors // Detailed errors from Zod
-        });
-    }
+  try {
+    const parsedBody = Schema.parse(req.body); // Validate the request body
+    req.body = parsedBody; // Overwrite the request body with the parsed data
+    next(); // Move to the next middleware or route handler
+  } catch (error) {
+    res.status(400).json({
+      message: "Validation Failed",
+      errors: error.errors, // Detailed errors from Zod
+    });
+  }
 };
 
 module.exports = validate;
@@ -931,20 +935,17 @@ module.exports = validate;
 Integrate the validation middleware into your routes. Open `auth-router.js` and update it as follows:
 
 ```js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { home, register, login } = require('../controllers/auth-controller');
-const { SignUpSchema } = require('../validators/auth-validator');
-const validate = require('../middlewares/validate-middleware');
+const { home, register, login } = require("../controllers/auth-controller");
+const { SignUpSchema } = require("../validators/auth-validator");
+const validate = require("../middlewares/validate-middleware");
 
-router.route('/')
-    .get(home);
+router.route("/").get(home);
 
-router.route('/register')
-    .post(validate(SignUpSchema), register); // Add validation middleware here
+router.route("/register").post(validate(SignUpSchema), register); // Add validation middleware here
 
-router.route('/login')
-    .post(login);
+router.route("/login").post(login);
 
 module.exports = router;
 ```
@@ -974,9 +975,11 @@ Today’s focus was on implementing centralized error handling in an Express.js 
 
    ```js
    const errorMiddleware = (err, req, res, next) => {
-       const status = err.status || 500;
-       const message = err.message || "Something went wrong. Server error. Please try again later.";
-       res.status(status).json({ message });
+     const status = err.status || 500;
+     const message =
+       err.message ||
+       "Something went wrong. Server error. Please try again later.";
+     res.status(status).json({ message });
    };
 
    module.exports = errorMiddleware;
@@ -988,37 +991,37 @@ Today’s focus was on implementing centralized error handling in an Express.js 
 
    ```js
    const register = async (req, res, next) => {
-       try {
-           const { username, email, phone, password } = req.body;
+     try {
+       const { username, email, phone, password } = req.body;
 
-           if (!username || !email || !phone || !password) {
-               return res.status(400).json({ message: "Please fill all the fields" });
-           }
-
-           const userExists = await User.findOne({ email });
-           if (userExists) {
-               return res.status(400).json({ message: "User already exists" });
-           }
-
-           const saltRound = 10;
-           const hashedPassword = await bcrypt.hash(String(password), saltRound);
-
-           const user = await User.create({
-               username,
-               email,
-               phone,
-               password: hashedPassword
-           });
-
-           res.status(201).json({
-               message: "User registered successfully",
-               createdUser: user,
-               token: await user.generateToken(),
-               userId: user._id.toString(),
-           });
-       } catch (error) {
-           next(error); // Pass the error to the middleware
+       if (!username || !email || !phone || !password) {
+         return res.status(400).json({ message: "Please fill all the fields" });
        }
+
+       const userExists = await User.findOne({ email });
+       if (userExists) {
+         return res.status(400).json({ message: "User already exists" });
+       }
+
+       const saltRound = 10;
+       const hashedPassword = await bcrypt.hash(String(password), saltRound);
+
+       const user = await User.create({
+         username,
+         email,
+         phone,
+         password: hashedPassword,
+       });
+
+       res.status(201).json({
+         message: "User registered successfully",
+         createdUser: user,
+         token: await user.generateToken(),
+         userId: user._id.toString(),
+       });
+     } catch (error) {
+       next(error); // Pass the error to the middleware
+     }
    };
    ```
 
@@ -1028,16 +1031,16 @@ Today’s focus was on implementing centralized error handling in an Express.js 
 
    ```js
    const validate = (Schema) => async (req, res, next) => {
-       try {
-           const parsedBody = Schema.parse(req.body);
-           req.body = parsedBody;
-           next();
-       } catch (error) {
-           next({
-               status: 400,
-               message: error.errors
-           });
-       }
+     try {
+       const parsedBody = Schema.parse(req.body);
+       req.body = parsedBody;
+       next();
+     } catch (error) {
+       next({
+         status: 400,
+         message: error.errors,
+       });
+     }
    };
 
    module.exports = validate;
@@ -1048,39 +1051,38 @@ Today’s focus was on implementing centralized error handling in an Express.js 
    Finally, make sure to include the error middleware in `index.js`:
 
    ```js
-   require('dotenv').config();
-   const express = require('express');
+   require("dotenv").config();
+   const express = require("express");
    const app = express();
-   const router = require('./router/auth-router');
-   const connectDB = require('./utils/db');
-   const errorMiddleware = require('./middlewares/error-middleware');
+   const router = require("./router/auth-router");
+   const connectDB = require("./utils/db");
+   const errorMiddleware = require("./middlewares/error-middleware");
 
    app.use(express.json());
-   app.use('/api/auth', router);
+   app.use("/api/auth", router);
 
-   app.get('/', (req, res) => {
-       res.send('Hello World');
+   app.get("/", (req, res) => {
+     res.send("Hello World");
    });
 
    app.use(errorMiddleware); // This must be just above the connection
 
    connectDB()
-       .then(() => {
-           const PORT = process.env.PORT || 3000;
-           app.listen(PORT, () => {
-               console.log(`Server is running on port ${PORT}`);
-           });
-       })
-       .catch((err) => {
-           console.error('Database connection failed', err);
-           process.exit(1);
+     .then(() => {
+       const PORT = process.env.PORT || 3000;
+       app.listen(PORT, () => {
+         console.log(`Server is running on port ${PORT}`);
        });
+     })
+     .catch((err) => {
+       console.error("Database connection failed", err);
+       process.exit(1);
+     });
    ```
 
 ### Summary
 
 By setting up a centralized error handling middleware in Express, you can efficiently manage errors across your application, improving the reliability and readability of your code.
-
 
 ## Day 12 - Contact Form (Schema, Route & Logics)
 
@@ -1099,24 +1101,24 @@ Today’s focus was on implementing a contact form in an Express.js application.
 Create a schema for the contact form data in `models/contact-form-model.js`:
 
 ```js
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const contactFormSchema = new mongoose.Schema({
-    email: {
-        type: String,
-        required: true,
-    },
-    subject: {
-        type: String,
-        required: true,
-    },
-    message: {
-        type: String,
-        required: true
-    },
+  email: {
+    type: String,
+    required: true,
+  },
+  subject: {
+    type: String,
+    required: true,
+  },
+  message: {
+    type: String,
+    required: true,
+  },
 });
 
-const ContactForm = mongoose.model('ContactForm', contactFormSchema);
+const ContactForm = mongoose.model("ContactForm", contactFormSchema);
 module.exports = ContactForm;
 ```
 
@@ -1127,37 +1129,36 @@ module.exports = ContactForm;
 Implement the logic to handle form submissions in `controllers/contact-controller.js`:
 
 ```js
-const Contact = require('../models/contact-form-model');
+const Contact = require("../models/contact-form-model");
 
 const contactForm = async (req, res, next) => {
-    try {
-        console.log(req.body);
+  try {
+    console.log(req.body);
 
-        const { email, subject, message } = req.body;
+    const { email, subject, message } = req.body;
 
-        // Check if any field is empty
-        if (!email || !subject || !message) {
-            return res.status(400).json({ message: "Please fill all the fields" });
-        }
-
-        // Create a new form data
-        const contactData = await Contact.create({
-            email,
-            subject,
-            message
-        });
-
-        res.status(201).json({
-            message: "Form Submitted Successfully",
-            formData: contactData,
-        });
-
-        console.log(contactData);
-
-    } catch (error) {
-        console.error(error);
-        next(error); // Pass the error to the middleware
+    // Check if any field is empty
+    if (!email || !subject || !message) {
+      return res.status(400).json({ message: "Please fill all the fields" });
     }
+
+    // Create a new form data
+    const contactData = await Contact.create({
+      email,
+      subject,
+      message,
+    });
+
+    res.status(201).json({
+      message: "Form Submitted Successfully",
+      formData: contactData,
+    });
+
+    console.log(contactData);
+  } catch (error) {
+    console.error(error);
+    next(error); // Pass the error to the middleware
+  }
 };
 
 module.exports = { contactForm };
@@ -1168,14 +1169,13 @@ module.exports = { contactForm };
 Define the route to handle contact form submissions in `router/contact-router.js`:
 
 ```js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { contactForm } = require('../controllers/contact-controller');
-const { ContactFormSchema } = require('../validators/contact-form-validator');
-const validate = require('../middlewares/validate-middleware');
+const { contactForm } = require("../controllers/contact-controller");
+const { ContactFormSchema } = require("../validators/contact-form-validator");
+const validate = require("../middlewares/validate-middleware");
 
-router.route('/contact')
-    .post(validate(ContactFormSchema), contactForm); // Middleware to validate the request body
+router.route("/contact").post(validate(ContactFormSchema), contactForm); // Middleware to validate the request body
 
 module.exports = router;
 ```
@@ -1185,27 +1185,27 @@ module.exports = router;
 Implement the validation logic for the contact form data in `validators/contact-form-validator.js`:
 
 ```js
-const { z } = require('zod');
+const { z } = require("zod");
 
 const ContactFormSchema = z.object({
-    email: z
-        .string({ required_error: "Email is required" })
-        .trim()
-        .min(3, { message: "Email must be at least 3 characters long" })
-        .max(255, { message: "Email must be at most 255 characters long" })
-        .email({ message: "Invalid email address", tldWhitelist: ["com", "net"] }),
+  email: z
+    .string({ required_error: "Email is required" })
+    .trim()
+    .min(3, { message: "Email must be at least 3 characters long" })
+    .max(255, { message: "Email must be at most 255 characters long" })
+    .email({ message: "Invalid email address", tldWhitelist: ["com", "net"] }),
 
-    subject: z
-        .string({ required_error: "Subject is required" })
-        .trim()
-        .min(3, { message: "Subject must be at least 3 characters long" })
-        .max(255, { message: "Subject must be at most 255 characters long" }),
+  subject: z
+    .string({ required_error: "Subject is required" })
+    .trim()
+    .min(3, { message: "Subject must be at least 3 characters long" })
+    .max(255, { message: "Subject must be at most 255 characters long" }),
 
-    message: z
-        .string({ required_error: "Message is required" })
-        .trim()
-        .min(3, { message: "Message must be at least 3 characters long" })
-        .max(255, { message: "Message must be at most 255 characters long" }),
+  message: z
+    .string({ required_error: "Message is required" })
+    .trim()
+    .min(3, { message: "Message must be at least 3 characters long" })
+    .max(255, { message: "Message must be at most 255 characters long" }),
 });
 
 module.exports = { ContactFormSchema };
@@ -1216,37 +1216,37 @@ module.exports = { ContactFormSchema };
 Ensure the contact route is integrated into your main application file `index.js`:
 
 ```js
-require('dotenv').config();
-const express = require('express');
+require("dotenv").config();
+const express = require("express");
 const app = express();
-const authRoute = require('./router/auth-router');
-const contactRoute = require('./router/contact-router');
-const connectDB = require('./utils/db');
-const errorMiddleware = require('./middlewares/error-middleware');
+const authRoute = require("./router/auth-router");
+const contactRoute = require("./router/contact-router");
+const connectDB = require("./utils/db");
+const errorMiddleware = require("./middlewares/error-middleware");
 
 // Middleware
 app.use(express.json());
-app.use('/api/auth', authRoute);
-app.use('/api/form', contactRoute);
+app.use("/api/auth", authRoute);
+app.use("/api/form", contactRoute);
 
-app.get('/', (req, res) => {
-    res.send('Hello World');
+app.get("/", (req, res) => {
+  res.send("Hello World");
 });
 
 app.use(errorMiddleware); // This must be just above the connection
 
 // Connect to the database and start the server
 connectDB()
-    .then(() => {
-        const PORT = process.env.PORT || 3000;
-        app.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
-        });
-    })
-    .catch((err) => {
-        console.error('Database connection failed', err);
-        process.exit(1);
+  .then(() => {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
     });
+  })
+  .catch((err) => {
+    console.error("Database connection failed", err);
+    process.exit(1);
+  });
 ```
 
 ### Testing
@@ -1255,9 +1255,9 @@ To test the contact form, use Postman to send a POST request to `http://localhos
 
 ```json
 {
-    "email": "example@example.com",
-    "subject": "Test Subject",
-    "message": "This is a test message."
+  "email": "example@example.com",
+  "subject": "Test Subject",
+  "message": "This is a test message."
 }
 ```
 
@@ -1265,100 +1265,99 @@ To test the contact form, use Postman to send a POST request to `http://localhos
 
 - ![Contact Form Testing Postman](./screenshots/contactFormPostman.png)
 
-
 ### Summary
 
 In this setup, we created a contact form feature that includes a Mongoose schema, an Express route, and validation logic. The contact form allows users to submit their email, subject, and message, and the data is stored in MongoDB.
 
 This centralized approach to handling form submissions, including validation and error management, helps maintain clean and organized code.
 
-
-
 ## Day 13 - Installing ReactJS
 
 ### Step 1: Set Up the ReactJS Project
 
 1. **Navigate to the frontend directory**:
-    ```bash
-    cd frontend
-    ```
+
+   ```bash
+   cd frontend
+   ```
 
 2. **Create a new React project using Vite**:
-    ```bash
-    npm create vite@latest .
-    ```
+
+   ```bash
+   npm create vite@latest .
+   ```
 
 3. **Configuration**:
-    - Select a framework: **React**
-    - Select a variant: **JavaScript**
+
+   - Select a framework: **React**
+   - Select a variant: **JavaScript**
 
 4. **Install dependencies and start the development server**:
-    ```bash
-    npm install
-    npm run dev
-    ```
+   ```bash
+   npm install
+   npm run dev
+   ```
 
 ### Step 2: Install and Configure Tailwind CSS
 
 1. **Install Tailwind CSS and its dependencies**:
-    ```bash
-    npm install -D tailwindcss postcss autoprefixer
-    npx tailwindcss init -p
-    ```
+
+   ```bash
+   npm install -D tailwindcss postcss autoprefixer
+   npx tailwindcss init -p
+   ```
 
 2. **Configure Tailwind in `tailwind.config.js`**:
-    ```js
-    /** @type {import('tailwindcss').Config} */
-    export default {
-      content: [
-        "./index.html",
-        "./src/**/*.{js,ts,jsx,tsx}",
-      ],
-      theme: {
-        extend: {},
-      },
-      plugins: [],
-    }
-    ```
+
+   ```js
+   /** @type {import('tailwindcss').Config} */
+   export default {
+     content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+     theme: {
+       extend: {},
+     },
+     plugins: [],
+   };
+   ```
 
 3. **Update `index.css` to use Tailwind’s base, components, and utilities**:
-    ```css
-    @tailwind base;
-    @tailwind components;
-    @tailwind utilities;
-    ```
+   ```css
+   @tailwind base;
+   @tailwind components;
+   @tailwind utilities;
+   ```
 
 ### Step 3: Test Tailwind CSS Installation
 
 1. **Update `App.jsx` to include a test component**:
-    ```jsx
-    import "./App.css";
 
-    const App = () => {
-      return (
-        <>
-          <h1 className="text-3xl font-bold underline">Hello world!</h1>
-        </>
-      );
-    };
+   ```jsx
+   import "./App.css";
 
-    export default App;
-    ```
+   const App = () => {
+     return (
+       <>
+         <h1 className="text-3xl font-bold underline">Hello world!</h1>
+       </>
+     );
+   };
+
+   export default App;
+   ```
 
 2. **Run the development server to verify the setup**:
-    ```bash
-    npm run dev
-    ```
+   ```bash
+   npm run dev
+   ```
 
 After following these steps, you should see "Hello world!" styled with Tailwind CSS on your browser, indicating that your ReactJS environment is successfully set up.
-
-
 
 ## Day 14 - Page Navigation with React Router DOM
 
 Today, we're learning how to create a multi-page application in React using **React Router DOM**. This will allow us to navigate between different pages without reloading the browser.
 
 ### What You’ll Learn
+
 - **React Router DOM basics**: How to set up and use React Router for page navigation.
 - **Creating a simple layout**: Adding a Header, Footer, and dynamic content area.
 - **Routing in React**: Displaying different components based on the URL path.
@@ -1370,6 +1369,7 @@ Let’s break it down step by step!
 First, we need to install `react-router-dom`, a package that handles routing in React applications.
 
 #### Installation Command
+
 Open your terminal and run:
 
 ```bash
@@ -1383,6 +1383,7 @@ This command installs the necessary library, enabling us to set up navigation be
 We'll create three simple pages: Home, About, and Contact. These will be the different pages that users can navigate to.
 
 #### Folder Structure
+
 1. Inside the `src` directory, create a new folder named `pages`.
 2. In the `pages` folder, create three files: `Home.jsx`, `About.jsx`, and `Contact.jsx`.
 
@@ -1431,6 +1432,7 @@ export default Contact;
 ```
 
 #### Explanation:
+
 - Each file contains a simple functional component. A functional component is just a JavaScript function that returns some JSX (HTML-like syntax).
 - We’re keeping the pages simple with just a heading for now. The goal is to understand routing.
 
@@ -1439,6 +1441,7 @@ export default Contact;
 Now, let’s create a navigation menu (Header) and a Footer that will appear on every page.
 
 #### Folder Structure
+
 1. Inside the `src` directory, create another folder named `components`.
 2. In the `components` folder, create two files: `Header.jsx` and `Footer.jsx`.
 
@@ -1454,7 +1457,6 @@ const Header = () => {
   return (
     <header className="w-full">
       <nav className="bg-white text-lg">
-        
         <ul className="flex font-medium">
           <li className="m-3">
             <NavLink
@@ -1496,6 +1498,7 @@ export default Header;
 ```
 
 #### Explanation:
+
 - **NavLink:** This component works like an anchor (`<a>`) tag but with additional features from React Router. It helps you create navigation links that are aware of the active route.
 - **Dynamic Styling:** The function inside `className` checks if the link is active. If it is, the link text turns orange; otherwise, it remains gray.
 
@@ -1503,11 +1506,7 @@ export default Header;
 
 ```jsx
 const Footer = () => {
-  return (
-    <div className="m-3">
-      Footer
-    </div>
-  );
+  return <div className="m-3">Footer</div>;
 };
 
 export default Footer;
@@ -1547,6 +1546,7 @@ export default App;
 ```
 
 #### Explanation:
+
 - **Header & Footer:** These components are included so they appear on every page.
 - **Outlet:** This is a placeholder where the current page content (like Home, About, or Contact) will be displayed based on the active route.
 
@@ -1564,7 +1564,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
 import "./index.css";
 
-// Import necessary modules 
+// Import necessary modules
 import {
   Route,
   RouterProvider,
@@ -1599,6 +1599,7 @@ createRoot(document.getElementById("root")).render(
 ```
 
 #### Explanation:
+
 - **Route Configuration:** The `Route` component connects each URL path to a specific component. For example, when the user navigates to `/about`, the `About` component is displayed.
 - **Nested Routes:** The `App` component serves as a parent route, so `Header` and `Footer` are always shown, and the `Outlet` dynamically loads the current page based on the route.
 
@@ -1607,13 +1608,17 @@ createRoot(document.getElementById("root")).render(
 Now that everything is set up, let’s test it out!
 
 #### Running the Application
+
 1. **Start the Development Server:**
-    ```bash
-    npm run dev
-    ```
+
+   ```bash
+   npm run dev
+   ```
+
    This command starts the React development server.
 
 2. **Open the Browser:**
+
    - Navigate to `http://localhost:3000/` in your web browser. You should see the Home page.
 
 3. **Navigate Between Pages:**
@@ -1624,6 +1629,7 @@ Now that everything is set up, let’s test it out!
 ### Recap & Conclusion
 
 Well done! 🎉 You’ve successfully created a multi-page React application with seamless navigation. Here's a quick recap of what you learned today:
+
 - **React Router DOM Basics:** You learned how to install and set up routing in a React app.
 - **Creating a Layout:** You built a consistent layout with a Header and Footer across all pages.
 - **Dynamic Navigation:** You used `NavLink` to highlight the current page and make navigation intuitive.
@@ -1656,6 +1662,7 @@ Add a new NavLink for the `/register` page:
 ```
 
 #### Explanation:
+
 - **`NavLink` Component:** Used to create navigation links in React. The `to` prop specifies the URL path, and the `className` applies styles dynamically based on whether the link is active.
 - **Dynamic Styling:** The `className` uses `isActive` to highlight the link when the user is on the corresponding page.
 
@@ -1681,6 +1688,7 @@ const router = createBrowserRouter(
 ```
 
 #### Explanation:
+
 - **Route Setup:** We’re telling React Router to render the `Register` component when the user visits `/register`.
 
 ### Step 3: Creating the Registration Page Component
@@ -1789,6 +1797,7 @@ export default Register;
 ```
 
 #### Explanation:
+
 - **State Management with `useState`:** We use the `useState` hook to manage the form data, including the username, email, phone number, and password.
 - **Input Handling:** The `handleInput` function captures changes to the input fields and updates the state accordingly.
 - **Form Submission:** The `handleSubmit` function prevents the default form submission behavior and logs the form data to the console. In a real application, you’d replace this with logic to send the data to a backend server.
@@ -1796,17 +1805,17 @@ export default Register;
 ### Step 4: Creating the Login Page and Contact Us Page (Do It Yourself)
 
 You’ve successfully created a registration form! Now, as a challenge, try creating a login form on your own. Here’s what you need to do:
+
 1. Add a NavLink for `/login` in `Header.jsx`.
 2. Create a `Login.jsx` component with form fields for email and password.
 3. Add a route for `/login` in `main.jsx`.
 
 **Reference Design**
+
 - ![Register](./screenshots/register.png)
 - ![Login](./screenshots/login.png)
 
-
 This guide should help you create a fully functional registration form with navigation. With React, once you understand the basic concepts like state management, routing, and component structure, you can build even more complex applications with ease!
-
 
 ## Day 16 - 404 Error Page (Page Not Found)
 
@@ -1825,9 +1834,9 @@ const router = createBrowserRouter(
       <Route path="" element={<Home />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
-      <Route path="/register" element={<Register />} /> 
-      <Route path="/login" element={<Login />} /> 
-      <Route path="*" element={<Error/>} /> {/* Catch-all route for 404 */}
+      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="*" element={<Error />} /> {/* Catch-all route for 404 */}
     </Route>
   )
 );
@@ -1845,7 +1854,8 @@ const Error = () => {
     <>
       <h1>404 Not Found</h1>
       <p>Sorry, the page you're looking for doesn't exist.</p>
-      <Link to="/">Go back to the main page</Link> {/* Link to redirect user to home */}
+      <Link to="/">Go back to the main page</Link>{" "}
+      {/* Link to redirect user to home */}
     </>
   );
 };
@@ -1864,7 +1874,6 @@ export default Error;
 Now, if you try to access a route in your application that doesn't exist (e.g., `http://localhost:3000/some-random-route`), the 404 error page will be displayed.
 
 This setup ensures a smooth user experience by guiding users back to a valid part of your application if they land on an incorrect URL.
-
 
 ## Day 17 - Connect Frontend with Backend and Store Registration Data
 
@@ -1924,7 +1933,7 @@ const Register = () => {
 
   const navigate = useNavigate();
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; // Getting the backend URL from the .env file 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; // Getting the backend URL from the .env file
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -1950,10 +1959,10 @@ const Register = () => {
           password: "",
         });
 
-        alert('Registration successful');
-        navigate('/login');
+        alert("Registration successful");
+        navigate("/login");
       } else {
-        alert('Registration failed');
+        alert("Registration failed");
       }
     } catch (error) {
       console.error("Error:", error);
@@ -2045,47 +2054,47 @@ To resolve the CORS issue, install the CORS package in the backend.
 2. **Configure CORS in `index.js`**: Add the following code to your `index.js` file:
 
    ```js
-   require('dotenv').config();
-   const express = require('express');
-   const cors = require('cors'); // Import cors
+   require("dotenv").config();
+   const express = require("express");
+   const cors = require("cors"); // Import cors
    const app = express();
-   const authRoute = require('./router/auth-router');
-   const contactRoute = require('./router/contact-router');
-   const connectDB = require('./utils/db');
-   const errorMiddleware = require('./middlewares/error-middleware');
+   const authRoute = require("./router/auth-router");
+   const contactRoute = require("./router/contact-router");
+   const connectDB = require("./utils/db");
+   const errorMiddleware = require("./middlewares/error-middleware");
 
    // CORS options for cross-origin requests
    const corsOptions = {
-       origin: process.env.VITE_FRONTEND_URL, // Frontend URL from .env
-       optionsSuccessStatus: 200, 
-       methods: "GET,HEAD,PUT,PATCH,POST,DELETE", 
-       credentials: true, 
+     origin: process.env.VITE_FRONTEND_URL, // Frontend URL from .env
+     optionsSuccessStatus: 200,
+     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+     credentials: true,
    };
 
    app.use(cors(corsOptions)); // Use cors with defined options
 
    app.use(express.json());
-   app.use('/api/auth', authRoute); // Auth routes
-   app.use('/api/form', contactRoute); // Contact form routes
+   app.use("/api/auth", authRoute); // Auth routes
+   app.use("/api/form", contactRoute); // Contact form routes
 
-   app.get('/', (req, res) => {
-       res.send('Hello World');
+   app.get("/", (req, res) => {
+     res.send("Hello World");
    });
 
    app.use(errorMiddleware); // Use error middleware
 
    // Connect to the database and start the server
    connectDB()
-       .then(() => {
-           const PORT = process.env.PORT || 3000;
-           app.listen(PORT, () => {
-               console.log(`Server is running on port ${PORT}`);
-           });
-       })
-       .catch((err) => {
-           console.error('Database connection failed', err);
-           process.exit(1);
+     .then(() => {
+       const PORT = process.env.PORT || 3000;
+       app.listen(PORT, () => {
+         console.log(`Server is running on port ${PORT}`);
        });
+     })
+     .catch((err) => {
+       console.error("Database connection failed", err);
+       process.exit(1);
+     });
    ```
 
 ### Step 4: Testing the Connection
@@ -2146,7 +2155,6 @@ In addition to storing registration data, extend the functionality to store cont
 
 By the end of this task, you should be able to store both registration and contact form data in MongoDB from the frontend.
 
-
 ## Day 18 - Login Through Frontend
 
 On Day 18, we'll add login functionality to the frontend using React and connect it to the backend for user authentication.
@@ -2190,19 +2198,19 @@ const Login = () => {
     });
   };
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; // Getting the backend URL(localhost:3000) from the .env file 
-  
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; // Getting the backend URL(localhost:3000) from the .env file
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
 
     try {
       const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
@@ -2210,12 +2218,12 @@ const Login = () => {
 
       if (response.ok) {
         setFormData({ email: "", password: "" });
-        navigate('/');
+        navigate("/");
       } else {
-        alert('Login failed, please try again.');
+        alert("Login failed, please try again.");
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     }
   };
 
@@ -2277,10 +2285,10 @@ You now have a functional login page that communicates with the backend to authe
 On Day 19, we'll focus on securely saving a JWT (JSON Web Token) in the browser's local storage to keep users logged in. We'll use React's **Context API** to make it easier to manage authentication across the app.
 
 ### What You’ll Do Today:
+
 1. Create an **authentication context** to store the token.
 2. Wrap your app with the context so it can be used anywhere.
 3. Update the **Login** and **Register** pages to store the token after successful login or registration.
-
 
 #### Step 1: Create Authentication Context (`auth.jsx`)
 
@@ -2291,7 +2299,7 @@ First, we'll create a new **context** to store and access the JWT token.
 3. Add the following code:
 
 ```jsx
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext } from "react";
 
 // Step 1: Create a context
 export const AuthContext = createContext();
@@ -2316,6 +2324,7 @@ export const useAuth = () => {
 ```
 
 **Explanation:**
+
 - **Context** allows us to share data (like a token) between components without passing it manually every time.
 - The `AuthProvider` provides the function `storeTokenInLocalStorage` to save the token in local storage.
 - The `useAuth` hook makes it easier to use this function in other parts of the app.
@@ -2328,10 +2337,12 @@ Next, we need to make this authentication context available to the entire app.
 2. Wrap your app in the `AuthProvider` component, like this:
 
 ```jsx
-import { AuthProvider } from './store/auth';
+import { AuthProvider } from "./store/auth";
 
 createRoot(document.getElementById("root")).render(
-  <AuthProvider> {/* Wrap the app to give access to the auth context */}
+  <AuthProvider>
+    {" "}
+    {/* Wrap the app to give access to the auth context */}
     <StrictMode>
       <RouterProvider router={router} />
     </StrictMode>
@@ -2361,22 +2372,23 @@ if (response.ok) {
     password: "",
   });
 
-  alert('Login successful');
-  navigate('/'); // Redirect to the homepage
+  alert("Login successful");
+  navigate("/"); // Redirect to the homepage
 } else {
-  alert('Login failed, please try again.');
+  alert("Login failed, please try again.");
 }
 ```
 
 **What’s Happening Here:**
+
 - After a successful login or registration, the JWT token is returned by the server.
 - We use `storeTokenInLocalStorage(data.token)` to save the token in local storage.
 - This ensures the user stays logged in, even after refreshing the page.
 
-
 #### Step 4: Check the Token in Local Storage
 
 You can verify that the JWT token is being stored in the browser by:
+
 1. Opening your app.
 2. Logging in or registering.
 3. Inspecting the browser's local storage (Right-click -> Inspect -> Application tab -> Local Storage).
@@ -2385,10 +2397,10 @@ Here’s how it should look:
 
 ![local_storage_token](./screenshots/localStorage_token.png)
 
-
 #### Summary
 
 After completing Day 19:
+
 - You now have a system to save JWT tokens in the browser.
 - The token is stored securely in local storage using the **Context API**.
 - Your app can now keep users logged in across different pages and sessions.
@@ -2400,11 +2412,11 @@ This process is essential for authentication in modern web apps and will help ke
 Today, we’ll learn how to log users out of the application by removing the JWT token from local storage. This ensures that when users log out, they are no longer authenticated.
 
 ### What You’ll Do Today:
+
 1. Create a **Logout** route in `main.jsx`.
 2. Build a **Logout.jsx** component to handle logging out.
 3. Update the **AuthContext** to include the logout functionality.
 4. Modify the **Header.jsx** to display the **Logout** link when the user is logged in.
-
 
 ### Step 1: Add Logout Route in `main.jsx`
 
@@ -2425,12 +2437,11 @@ const router = createBrowserRouter(
       <Route path="/logout" element={<Logout />} /> {/* Logout route */}
       <Route path="*" element={<Error />} />
     </Route>
-  ),
+  )
 );
 ```
 
 This creates a route that points to the **Logout** component.
-
 
 ### Step 2: Create the `Logout.jsx` Component
 
@@ -2458,9 +2469,9 @@ export default Logout;
 ```
 
 **Explanation:**
+
 - The `LogoutUser` function is called as soon as the component loads, removing the JWT token.
 - After logging out, the user is immediately redirected to the **Login** page.
-
 
 ### Step 3: Update the Authentication Context (`auth.jsx`)
 
@@ -2470,12 +2481,11 @@ We need to modify the authentication context to support the logout functionality
 2. Add the following updates:
 
 ```jsx
-import { createContext, useContext, useState } from 'react'; 
+import { createContext, useContext, useState } from "react";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  
   const [token, setToken] = useState(localStorage.getItem("token")); // Get token from local storage
 
   let isLoggedIn = !!token; // Check if the user is logged in
@@ -2493,7 +2503,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ storeTokenInLocalStorage, LogoutUser, isLoggedIn }}>
+    <AuthContext.Provider
+      value={{ storeTokenInLocalStorage, LogoutUser, isLoggedIn }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -2501,11 +2513,12 @@ export const AuthProvider = ({ children }) => {
 
 // Custom hook to use the AuthContext
 export const useAuth = () => {
-  return useContext(AuthContext); 
+  return useContext(AuthContext);
 };
 ```
 
 **What Changed:**
+
 - We added a `LogoutUser` function that clears the token from both state and local storage.
 - `isLoggedIn` now dynamically checks if a token is present.
 
@@ -2531,7 +2544,9 @@ const Header = () => {
               <NavLink
                 to="/logout"
                 className={({ isActive }) =>
-                  `py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
+                  `py-2 ${
+                    isActive ? "text-blue-400" : "text-gray-300"
+                  } hover:text-blue-400`
                 }
               >
                 Logout
@@ -2543,7 +2558,9 @@ const Header = () => {
                 <NavLink
                   to="/register"
                   className={({ isActive }) =>
-                    `py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
+                    `py-2 ${
+                      isActive ? "text-blue-400" : "text-gray-300"
+                    } hover:text-blue-400`
                   }
                 >
                   Register
@@ -2554,7 +2571,9 @@ const Header = () => {
                 <NavLink
                   to="/login"
                   className={({ isActive }) =>
-                    `py-2 ${isActive ? "text-blue-400" : "text-gray-300"} hover:text-blue-400`
+                    `py-2 ${
+                      isActive ? "text-blue-400" : "text-gray-300"
+                    } hover:text-blue-400`
                   }
                 >
                   Login
@@ -2572,42 +2591,41 @@ export default Header;
 ```
 
 **Explanation:**
+
 - If the user is logged in (`isLoggedIn` is `true`), show the **Logout** link.
 - If the user is not logged in, show the **Login** and **Register** links.
 
 Now, users can securely log out of your app!
 
-
 ## Day 21 - JWT Token Verification Middleware & User Data Route
 
 Today, we’ll create a **JWT Token Verification Middleware** to protect routes and allow only authenticated users to access certain endpoints. Additionally, we’ll create a route to get user data from the database based on their JWT token.
-
-
 
 ### Step 1: Define Routes in `auth-router.js`
 
 First, we will add a protected route to fetch user data. This route will use the **JWT Token Verification Middleware** to ensure only logged-in users can access it.
 
 ```js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { home, register, login, user } = require('../controllers/auth-controller');
-const { SignUpSchema, LoginSchema } = require('../validators/auth-validator');
-const validate = require('../middlewares/validate-middleware');
-const authMiddleware = require('../middlewares/auth-middleware');
+const {
+  home,
+  register,
+  login,
+  user,
+} = require("../controllers/auth-controller");
+const { SignUpSchema, LoginSchema } = require("../validators/auth-validator");
+const validate = require("../middlewares/validate-middleware");
+const authMiddleware = require("../middlewares/auth-middleware");
 
-router.route('/')
-    .get(home);
+router.route("/").get(home);
 
-router.route('/register')
-    .post(validate(SignUpSchema), register);
+router.route("/register").post(validate(SignUpSchema), register);
 
-router.route('/login')
-    .post(validate(LoginSchema), login);
+router.route("/login").post(validate(LoginSchema), login);
 
 // Get User Data Route with authMiddleware protection
-router.route('/user')
-    .get(authMiddleware, user);
+router.route("/user").get(authMiddleware, user);
 
 module.exports = router;
 ```
@@ -2623,37 +2641,43 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user-model");
 
 const authMiddleware = async (req, res, next) => {
-    try {
-        const token = req.header('Authorization');
+  try {
+    const token = req.header("Authorization");
 
-        // Check if token is provided
-        if (!token) {
-            return res.status(401).json({ message: "Unauthorized User, Token Not Found" });
-        }
-
-        // Clean the token by removing 'Bearer'
-        const jwtToken = token.replace('Bearer', '').trim();
-
-        // Verify the token
-        const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET);
-
-        // Find the user in the database using the decoded token data
-        const userData = await User.findOne({ email: decoded.email }).select({ password: 0 });
-
-        if (!userData) {
-            return res.status(404).json({ message: `User with email ${decoded.email} not found` });
-        }
-
-        // Attach user data and token to the request object
-        req.user = userData;
-        req.token = jwtToken;
-        req.userID = userData._id;
-
-        // Proceed to the next middleware or controller
-        next();
-    } catch (error) {
-        next({ status: 400, message: error.message });
+    // Check if token is provided
+    if (!token) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized User, Token Not Found" });
     }
+
+    // Clean the token by removing 'Bearer'
+    const jwtToken = token.replace("Bearer", "").trim();
+
+    // Verify the token
+    const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET);
+
+    // Find the user in the database using the decoded token data
+    const userData = await User.findOne({ email: decoded.email }).select({
+      password: 0,
+    });
+
+    if (!userData) {
+      return res
+        .status(404)
+        .json({ message: `User with email ${decoded.email} not found` });
+    }
+
+    // Attach user data and token to the request object
+    req.user = userData;
+    req.token = jwtToken;
+    req.userID = userData._id;
+
+    // Proceed to the next middleware or controller
+    next();
+  } catch (error) {
+    next({ status: 400, message: error.message });
+  }
 };
 
 module.exports = authMiddleware;
@@ -2666,16 +2690,16 @@ In `auth-controller.js`, add the controller to handle fetching the user data onc
 ```js
 // Controller to send user data
 const user = async (req, res, next) => {
-    try {
-        const userData = req.user;
-        return res.status(200).json({
-            user: userData,
-            message: "User data sent successfully"
-        });
-    } catch (error) {
-        console.error(error);
-        next(error);
-    }
+  try {
+    const userData = req.user;
+    return res.status(200).json({
+      user: userData,
+      message: "User data sent successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
 };
 ```
 
@@ -2683,18 +2707,20 @@ const user = async (req, res, next) => {
 
 1. **URL**: `http://localhost:3000/api/auth/user`
 2. **Method**: `GET`
-3. **Authorization Header**: 
+3. **Authorization Header**:
+
    - Key: `Authorization`
    - Value: `Bearer <your_jwt_token>` (replace `<your_jwt_token>` with the token stored in local storage after login).
 
    Example:
+
    ```
    Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NmQ0MzRlNzg2NmJjMzExYmVhMjA0MjMiLCJlbWFpbCI6ImFtYW5AZ21haWwuY29tIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTcyNzYwNTQ3OSwiZXhwIjoxNzI4MjEwMjc5fQ.-CADCRE4t4NGCeRM9KAhOx1orVWweM4jkUUIpUUX084
    ```
 
-**Screenshot:**  
-- ![Getting-User-Data](./screenshots/getUserDetails.png)
+**Screenshot:**
 
+- ![Getting-User-Data](./screenshots/getUserDetails.png)
 
 ### Summary
 
@@ -2703,3 +2729,117 @@ const user = async (req, res, next) => {
 - We tested the route using **Postman** by sending the JWT token in the **Authorization header**.
 
 Now, you have a fully functional protected route for fetching user data! 🎉
+
+## Day 22 - Show User Details in Frontend
+
+Today, we will learn how to **fetch user details** from the backend and display them on the frontend after the user has logged in using a JWT token.
+
+### Step 1: Modify `auth.jsx` to Fetch User Data
+
+In this step, we’ll add a function in our `auth.jsx` file that fetches user details from the backend using the stored JWT token.
+
+```jsx
+import { createContext, useContext, useEffect, useState } from "react";
+
+// Create the context
+export const AuthContext = createContext();
+
+// AuthProvider component (Provide the Context value)
+export const AuthProvider = ({ children }) => {
+  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [loggedInUser, setLoggedInUser] = useState(""); // Store logged-in user data
+
+  let isLoggedIn = !!token; // Check if the token exists, user is logged in
+
+  const storeTokenInLocalStorage = (serverToken) => {
+    setToken(serverToken);
+    localStorage.setItem("token", serverToken); // Save token to local storage
+  };
+
+  // Logout function
+  const LogoutUser = () => {
+    setToken("");
+    return localStorage.removeItem("token");
+  };
+
+  // Get User Data from the backend
+  const getUserData = async () => {
+    try {
+      const backendURL = import.meta.env.VITE_BACKEND_URL; // Backend URL from environment
+      const url = `${backendURL}/api/auth/user`; // API endpoint for user data
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`, // Send token with the request
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json(); // Get user data from the response
+        setLoggedInUser(data); // Set user data in state
+      } else {
+        console.log("Failed to Fetch Data");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Fetch user data once the component is mounted
+  useEffect(() => {
+    getUserData();
+  }, []);
+
+  return (
+    <AuthContext.Provider
+      value={{ storeTokenInLocalStorage, LogoutUser, isLoggedIn, loggedInUser }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+// Custom hook to use the Auth Context
+export const useAuth = () => {
+  return useContext(AuthContext);
+};
+```
+
+### Step 2: Display User Data in the Frontend
+
+Now that the user data is fetched and stored in `loggedInUser`, you can display it anywhere in your app, such as in the **Header** component or a **Profile** page.
+
+Here’s how you can access the user details in the `Header.jsx`:
+
+```jsx
+import { useAuth } from "../store/auth"; // Import the useAuth hook
+
+const Header = () => {
+  const { loggedInUser } = useAuth(); // Get the user data from the Auth Context
+
+  return (
+    <header>
+      {loggedInUser?.user?.username && (
+        <p>Welcome, {loggedInUser.user.username}!</p> // Display the username
+      )}
+    </header>
+  );
+};
+
+export default Header;
+```
+
+### Step 3: Testing the Feature
+
+1. **Login**: First, log in as a user to get a valid JWT token stored in the browser's local storage.
+2. **Verify Token**: The `getUserData` function will automatically use this token to fetch the user's data from the backend.
+3. **View Data**: You should now see the logged-in user’s **username** (or any other data) displayed in the component where you accessed `loggedInUser`.
+
+### Summary
+
+- We updated the `auth.jsx` file to include a function for fetching **user details** from the backend using the JWT token stored in local storage.
+- We used the `useAuth` hook to access the **user data** and display it in the frontend, such as in the `Header` or other components.
+- The user’s details will now be shown after a successful login.
+
+Now, you can easily display user information anywhere in your app after they have logged in! 🎉
