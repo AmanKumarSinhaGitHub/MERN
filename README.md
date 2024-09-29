@@ -2578,6 +2578,128 @@ export default Header;
 Now, users can securely log out of your app!
 
 
-## Day 21 - JWT Token Verification Middleware & Creating Route to Get User Data from Database
+## Day 21 - JWT Token Verification Middleware & User Data Route
+
+Today, we’ll create a **JWT Token Verification Middleware** to protect routes and allow only authenticated users to access certain endpoints. Additionally, we’ll create a route to get user data from the database based on their JWT token.
 
 
+
+### Step 1: Define Routes in `auth-router.js`
+
+First, we will add a protected route to fetch user data. This route will use the **JWT Token Verification Middleware** to ensure only logged-in users can access it.
+
+```js
+const express = require('express');
+const router = express.Router();
+const { home, register, login, user } = require('../controllers/auth-controller');
+const { SignUpSchema, LoginSchema } = require('../validators/auth-validator');
+const validate = require('../middlewares/validate-middleware');
+const authMiddleware = require('../middlewares/auth-middleware');
+
+router.route('/')
+    .get(home);
+
+router.route('/register')
+    .post(validate(SignUpSchema), register);
+
+router.route('/login')
+    .post(validate(LoginSchema), login);
+
+// Get User Data Route with authMiddleware protection
+router.route('/user')
+    .get(authMiddleware, user);
+
+module.exports = router;
+```
+
+### Step 2: Create `auth-middleware.js` for JWT Verification
+
+This middleware checks for the token in the request headers, verifies it using the secret key, and fetches the user data from the database if the token is valid.
+
+In the `middlewares` folder, create `auth-middleware.js`:
+
+```js
+const jwt = require("jsonwebtoken");
+const User = require("../models/user-model");
+
+const authMiddleware = async (req, res, next) => {
+    try {
+        const token = req.header('Authorization');
+
+        // Check if token is provided
+        if (!token) {
+            return res.status(401).json({ message: "Unauthorized User, Token Not Found" });
+        }
+
+        // Clean the token by removing 'Bearer'
+        const jwtToken = token.replace('Bearer', '').trim();
+
+        // Verify the token
+        const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET);
+
+        // Find the user in the database using the decoded token data
+        const userData = await User.findOne({ email: decoded.email }).select({ password: 0 });
+
+        if (!userData) {
+            return res.status(404).json({ message: `User with email ${decoded.email} not found` });
+        }
+
+        // Attach user data and token to the request object
+        req.user = userData;
+        req.token = jwtToken;
+        req.userID = userData._id;
+
+        // Proceed to the next middleware or controller
+        next();
+    } catch (error) {
+        next({ status: 400, message: error.message });
+    }
+};
+
+module.exports = authMiddleware;
+```
+
+### Step 3: Create the User Controller Method
+
+In `auth-controller.js`, add the controller to handle fetching the user data once they are authenticated.
+
+```js
+// Controller to send user data
+const user = async (req, res, next) => {
+    try {
+        const userData = req.user;
+        return res.status(200).json({
+            user: userData,
+            message: "User data sent successfully"
+        });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+};
+```
+
+### Step 4: Test the `/user` Route Using Postman
+
+1. **URL**: `http://localhost:3000/api/auth/user`
+2. **Method**: `GET`
+3. **Authorization Header**: 
+   - Key: `Authorization`
+   - Value: `Bearer <your_jwt_token>` (replace `<your_jwt_token>` with the token stored in local storage after login).
+
+   Example:
+   ```
+   Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NmQ0MzRlNzg2NmJjMzExYmVhMjA0MjMiLCJlbWFpbCI6ImFtYW5AZ21haWwuY29tIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTcyNzYwNTQ3OSwiZXhwIjoxNzI4MjEwMjc5fQ.-CADCRE4t4NGCeRM9KAhOx1orVWweM4jkUUIpUUX084
+   ```
+
+**Screenshot:**  
+- ![Getting-User-Data](./screenshots/getUserDetails.png)
+
+
+### Summary
+
+- We created a **JWT Token Verification Middleware** that protects routes by verifying the JWT token sent in the request headers.
+- We added a **user route** to fetch user data from the database only for authenticated users.
+- We tested the route using **Postman** by sending the JWT token in the **Authorization header**.
+
+Now, you have a fully functional protected route for fetching user data! 🎉
