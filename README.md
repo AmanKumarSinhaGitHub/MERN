@@ -2576,3 +2576,8 @@ export default Header;
 - If the user is not logged in, show the **Login** and **Register** links.
 
 Now, users can securely log out of your app!
+
+
+## Day 21 - JWT Token Verification Middleware & Creating Route to Get User Data from Database
+
+

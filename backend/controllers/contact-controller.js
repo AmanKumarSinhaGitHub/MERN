@@ -23,7 +23,7 @@ const contactForm = async (req, res, next) => {
             formData: contactData,
         });
 
-        console.log(contactData);
+        // console.log(contactData);
 
     } catch (error) {
         console.error(error);

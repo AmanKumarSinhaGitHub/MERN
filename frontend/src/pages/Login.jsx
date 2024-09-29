@@ -23,7 +23,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
+    // console.log("Form submitted:", formData);
 
     try {
       const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
@@ -35,7 +35,7 @@ const Login = () => {
       });
 
       const data = await response.json();
-      console.log(data);
+      // console.log(data);
 
       if (response.ok) {
         // Save the token in local storage

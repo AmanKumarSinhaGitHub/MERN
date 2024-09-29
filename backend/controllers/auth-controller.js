@@ -12,7 +12,7 @@ const home = async (req, res) => {
 
 const register = async (req, res) => {
     try {
-        console.log(req.body);
+        // console.log(req.body);
 
         const { username, email, phone, password } = req.body;
 
@@ -46,7 +46,7 @@ const register = async (req, res) => {
             userId: user._id.toString(),
         });
 
-        console.log(user);
+        // console.log(user);
     } catch (error) {
         console.error(error);
         // res.status(500).json({ message: "Server error. Please try again later." });
@@ -57,7 +57,7 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        console.log(req.body);
+        // console.log(req.body);
         let { email, password } = req.body;
 
         // Check if any field is empty

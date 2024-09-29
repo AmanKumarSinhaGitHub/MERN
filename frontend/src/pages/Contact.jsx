@@ -19,12 +19,12 @@ const Contact = () => {
   const navigate = useNavigate();
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-  console.log('Backend URL:', BACKEND_URL); // Add this to debug
+  // console.log('Backend URL:', BACKEND_URL); // Add this to debug
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle form submission logic here
-    console.log("Form submitted:", formData);
+    // console.log("Form submitted:", formData);
 
     try {
       const response = await fetch(`${BACKEND_URL}/api/form/contact`, {

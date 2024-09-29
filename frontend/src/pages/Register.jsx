@@ -26,7 +26,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle form submission logic here
-    console.log("Form submitted:", formData);
+    // console.log("Form submitted:", formData);
 
     try {
       const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
@@ -37,7 +37,7 @@ const Register = () => {
         body: JSON.stringify(formData), // Convert JS object to JSON string
       });
       const data = await response.json();
-      console.log(data);
+      // console.log(data);
 
       // Clearning the form after submission
       if (response.ok) {
