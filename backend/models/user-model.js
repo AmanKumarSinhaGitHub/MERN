@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // Genetate token
-userSchema.methods.generateToken = async () => {
+userSchema.methods.generateToken = async function () {
     try {
         const token = jwt.sign(
             { _id: this._id, email: this.email, isAdmin: this.isAdmin },
@@ -36,8 +36,10 @@ userSchema.methods.generateToken = async () => {
         return token;
     } catch (error) {
         console.error(error);
+        throw new Error("Token generation failed");
     }
 };
+
 
 
 const User = mongoose.model('User', userSchema);

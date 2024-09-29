@@ -92,5 +92,22 @@ const login = async (req, res) => {
     }
 };
 
-// export
-module.exports = { home, register, login };
+
+// Send User Data using Get Method
+const user = async (req, res) => {
+    try {
+        const userData = await req.user;
+        return res.status(200).json(
+            {
+                user: userData,
+                message: "User data sent successfully"
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
+
+
+module.exports = { home, register, login, user };
