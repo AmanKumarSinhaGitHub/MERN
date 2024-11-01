@@ -9,17 +9,17 @@ const authMiddleware = async (req, res, next) => {
             return res.status(401).json({ message: "Unauthorized User, Token Not Found" });
         }
 
-        console.log("Raw token: ", token);
+        // console.log("Raw token: ", token);
 
         // Remove the 'Bearer' from the token
         const jwtToken = token.replace('Bearer', '').trim();
 
-        console.log("JWT token without Bearer: ", jwtToken);
+        // console.log("JWT token without Bearer: ", jwtToken);
 
         // Verify the token
         const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET);
 
-        console.log("Decoded JWT payload: ", decoded); // Check what's inside decoded
+        // console.log("Decoded JWT payload: ", decoded); // Check what's inside decoded
 
         // Find the user by decoded email
         const userData = await User.findOne({ email: decoded.email }).select({ password: 0 });
@@ -28,7 +28,7 @@ const authMiddleware = async (req, res, next) => {
             return res.status(404).json({ message: `User with email ${decoded.email} not found` });
         }
 
-        console.log("User found: ", userData);
+        // console.log("User found: ", userData);
 
         req.user = userData;
         req.token = jwtToken;

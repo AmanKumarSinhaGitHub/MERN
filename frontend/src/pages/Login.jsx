@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../store/auth";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -46,14 +47,15 @@ const Login = () => {
           password: "",
         });
 
-        alert("Login successful");
+        toast.success("Login successful"); // Success toast message
         // Redirect to the home page
         navigate("/");
       } else {
-        alert("Login failed");
+        toast.error(data.message[0]?.message || "Login failed");
       }
     } catch (error) {
       console.error("Error:", error);
+      toast.error("An error occurred. Please try again."); // Error toast message
     }
   };
 

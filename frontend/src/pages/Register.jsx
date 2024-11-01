@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../store/auth";
+import { toast } from "react-toastify";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -37,7 +38,7 @@ const Register = () => {
         body: JSON.stringify(formData), // Convert JS object to JSON string
       });
       const data = await response.json();
-      // console.log(data);
+      // console.log(data.message);
 
       // Clearning the form after submission
       if (response.ok) {
@@ -51,14 +52,17 @@ const Register = () => {
           password: "",
         });
 
-        alert("Registration successful");
+        toast.success("Registration successful!");
         // Redirect to the login page
         navigate("/login");
       } else {
-        alert("Registration failed");
+        // console.log(data.message[0].message);
+
+        toast.error(data.message[0]?.message || "Registration failed");
       }
     } catch (error) {
       console.error("Error:", error);
+      toast.error("An error occurred. Please try again later.");
     }
   };
 

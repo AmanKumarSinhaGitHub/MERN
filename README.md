@@ -979,7 +979,7 @@ Today’s focus was on implementing centralized error handling in an Express.js 
      const message =
        err.message ||
        "Something went wrong. Server error. Please try again later.";
-     res.status(status).json({ message });
+     return res.status(status).json({ message });
    };
 
    module.exports = errorMiddleware;
@@ -2843,3 +2843,83 @@ export default Header;
 - The user’s details will now be shown after a successful login.
 
 Now, you can easily display user information anywhere in your app after they have logged in! 🎉
+
+## Day 23 - Handling Login & Registration Form Validation with React Toastify
+
+Today, we'll integrating **React Toastify** to display success and error messages in our Login and Registration forms.
+
+
+### Step 1: Install React Toastify
+
+In your frontend project folder, install `react-toastify`:
+
+```bash
+npm i react-toastify
+```
+
+---
+
+### Step 2: Configure Toastify in `main.jsx`
+
+Import `ToastContainer` and its CSS to make Toastify available across the app. Add `<ToastContainer />` to the top-level component structure in `main.jsx`.
+
+**Example changes in `main.jsx`:**
+
+```jsx
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
+
+// Wrap App with ToastContainer and AuthProvider
+createRoot(document.getElementById("root")).render(
+  <AuthProvider>
+    <ToastContainer /> {/* This enables toast notifications */}
+    <StrictMode>
+      <RouterProvider router={router} />
+    </StrictMode>
+  </AuthProvider>
+);
+```
+
+---
+
+### Step 3: Add Toastify Notifications in Login Component
+
+In the `Login.jsx` component, import and use Toastify to display feedback messages.
+
+**Example steps in `Login.jsx`:**
+
+1. **Import Toastify**: Import `toast` from `react-toastify`.
+2. **Handle Success and Error**: Inside `handleSubmit`, call `toast.success()` or `toast.error()` based on the response.
+
+```jsx
+import { toast } from "react-toastify";
+
+// Handle form submission
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/auth/login`, { /* config */ });
+    const data = await response.json();
+
+    if (response.ok) {
+      storeTokenInLocalStorage(data.token); // Save token
+      toast.success("Login successful");     // Success message
+      navigate("/");
+    } else {
+      toast.error(data.message[0]?.message || "Login failed"); // Error message
+    }
+  } catch (error) {
+    toast.error("An error occurred. Please try again.");       // Error message
+  }
+};
+```
+
+---
+
+### Summary
+
+- **Install React Toastify** to enable toast notifications.
+- **Configure Toastify in `main.jsx`** by adding `<ToastContainer />` to the root component.
+- **Add Toast Messages** in `Login` and `Register` components to improve user feedback on form submission.
+
+By following these steps, you enhance the user experience by providing immediate feedback on login and registration actions. 🎉

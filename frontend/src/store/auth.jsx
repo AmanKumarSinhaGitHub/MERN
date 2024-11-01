@@ -36,8 +36,8 @@ export const AuthProvider = ({ children }) => {
         },
       });
 
-      console.log("url", url);
-      console.log("token", token);
+      // console.log("url", url);
+      // console.log("token", token);
 
       if (response.ok) {
         const data = await response.json();
