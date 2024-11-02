@@ -2923,3 +2923,84 @@ const handleSubmit = async (e) => {
 - **Add Toast Messages** in `Login` and `Register` components to improve user feedback on form submission.
 
 By following these steps, you enhance the user experience by providing immediate feedback on login and registration actions. 🎉
+
+
+# Day 24 - Admin Panel Setup & Retrieving User Data
+
+Today, we'll set up an admin endpoint in the backend to fetch all registered user data, excluding passwords. This will be useful for viewing user data in an admin panel.
+
+---
+
+### Step 1: Create Admin Router
+
+In the `backend/router` folder, create a new file named **`admin-router.js`** to define the routes for the admin functionality.
+
+**admin-router.js:**
+```js
+const express = require('express');
+const getAllUsers = require('../controllers/admin-controller'); 
+const router = express.Router();
+
+// Route to get all registered users
+router.route('/users').get(getAllUsers);
+
+module.exports = router;
+```
+
+---
+
+### Step 2: Create Admin Controller
+
+In the `backend/controllers` folder, create a new file named **`admin-controller.js`**. Here, we'll define a function to fetch all users, excluding sensitive information such as passwords.
+
+**admin-controller.js:**
+```js
+const User = require('../models/user-model');
+
+// Fetch all registered users without passwords
+const getAllUsers = async (req, res, next) => { 
+    try {
+        const users = await User.find({}, { password: 0 });  // Exclude passwords
+        if(!users) {
+            return res.status(404).json({ message: 'No users found' });
+        }
+        res.status(200).json(users);
+    } catch (error) {
+        next(error); 
+    }
+};
+
+module.exports = getAllUsers;
+```
+
+---
+
+### Step 3: Update the Main Backend File
+
+In **`index.js`**, import the new admin route and use it to enable the `/api/admin/users` endpoint.
+
+**index.js:**
+```js
+const adminRoute = require('./router/admin-router');
+
+// Admin route for accessing registered users
+app.use('/api/admin', adminRoute);
+```
+
+---
+
+### Step 4: Test with Postman
+
+1. Open Postman and send a **GET** request to `http://localhost:3000/api/admin/users`.
+2. You should see a response with a list of registered users, excluding passwords.
+- ![Users Data in Postman](./screenshots/admin_get_user.png)
+
+---
+
+### Summary
+
+- **Created a new admin route** to manage user data retrieval.
+- **Configured the controller** to fetch user data, excluding passwords.
+- **Integrated the route** into the main app file and tested the endpoint using Postman.
+
+This setup will make it easy to expand our admin functionality for managing users. 🎉
